@@ -7,6 +7,7 @@
 #include <fstream>
 
 class VectorTSVReader {
+public:
 
                                 VectorTSVReader (std::string flename)   :filename(flename) {}
             void                initialize      ()                      {this->inputFile.open(this->filename, std::ios::in);}
