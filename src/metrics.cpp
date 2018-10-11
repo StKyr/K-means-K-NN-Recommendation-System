@@ -4,6 +4,8 @@ double metrics::euclidean_distance(NDVector v, NDVector u){
     NDVector diff = v - u;
     return diff.norm();
 }
+
+
 double metrics::cosine_distance(NDVector v, NDVector u){
     if (v.norm() == 0 || u.norm() == 0) throw std::logic_error("Nonsensical definition of cosine similarity for zero vectors");
 
