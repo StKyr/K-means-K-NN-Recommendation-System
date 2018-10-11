@@ -71,10 +71,11 @@ NDVector   NDVector::operator -  (const NDVector& rhs){
 
 
 NDVector   operator *  (double l, NDVector& rhs){
-    if (rhs.coords.empty()) throw std::range_error("Unitialized Vector Exception");
+    if (!rhs.dim()) throw std::range_error("Unitialized Vector Exception");
 
     std::vector<double> result = std::vector<double>();
-    for (auto x: rhs.coords){
+    for (int i=0; i<rhs.dim(); i++) {
+        double x = rhs[i];
         result.push_back(l * x);
     }
     return NDVector(result);
@@ -134,9 +135,9 @@ std::ostream& operator << (std::ostream& os, NDVector& rhs)
 {
     os << "{";
     for (int i=0; i<rhs.dim()-1; i++){
-        os << rhs.coords[i] << ", ";
+        os << rhs[i] << ", ";
     }
-    os << rhs.coords[rhs.dim()-1] << "}";
+    os << rhs[rhs.dim()-1] << "}";
     return os;
 }
 
