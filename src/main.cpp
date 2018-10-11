@@ -3,6 +3,7 @@
 #include <DatasetReader.h>
 #include <QuerysetReader.h>
 #include <boost/program_options.hpp>
+#include <NearestNeighborSearch.h>
 
 void parse_command_line_arguments(int argc, char *argv[]);
 namespace Params {
@@ -33,18 +34,22 @@ int main(int argc, char *argv[]) {
     std::vector<double> xs;
     int i;
     xs = reader.parseNextLine(&s);
+
+    std::unordered_map<std::string, NDVector> X;
+
     while (! xs.empty()) {
         NDVector v(xs);
         std::cout << v << std::endl;
         xs = reader.parseNextLine(&s);
+        X[s] = v;
     }
 
+    std::pair<std::string, double> result;
+    result = nearestNeighbor(NDVector({0,0,0,0}), X, metrics::euclidean_distance);
 
-    std::cout << Params::input_file <<std::endl;
-    std::cout << Params::output_file <<std::endl;
-    std::cout << Params::query_file <<std::endl;
-    std::cout << Params::k <<std::endl;
-    std::cout << Params::L <<std::endl;
+    std::cout << result.first << std::endl;
+    std::cout << result.second << std::endl;
+
     return 0;
 
 }
