@@ -6,6 +6,10 @@ void DatasetReader::parseFirstLine(){
     std::string metricName;
     std::size_t pos1;
     std::size_t comment_pos;
+/*
+    this->inputFile.open(this->filename);
+    bool failed = inputFile.fail();*/
+
 
     if(this->inputFile.is_open()) {
         if (getline(this->inputFile, line)) {
@@ -25,12 +29,21 @@ void DatasetReader::parseFirstLine(){
                 }else if (metricName == "cosine"){
                     this->metric = Cosine;
                 }else{
-                    throw std::logic_error("Invalid metric name");
+                    throw std::runtime_error("Invalid metric name");
                 }
 
+            }else if(pos1 == std::string::npos) {  // no first line
+
+                this->metric = Euclidean;
+                return;
+
             }else{
-                throw std::logic_error("Invalid Input format");
+                throw std::runtime_error("Invalid Input format");
             }
+        }else{
+            throw std::runtime_error("File is empty");
         }
+    }else{
+        throw std::runtime_error("File is not open");
     }
 }

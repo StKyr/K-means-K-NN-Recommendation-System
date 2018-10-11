@@ -9,7 +9,7 @@
 class VectorTSVReader {
 public:
 
-                                VectorTSVReader (std::string flename)   :filename(flename) {}
+            explicit            VectorTSVReader (std::string flename)   :filename(flename) {}
             void                initialize      ()                      {this->inputFile.open(this->filename, std::ios::in);}
     virtual void                parseFirstLine  ()                      = 0;
             std::vector<double> parseNextLine   (std::string *vectorId);

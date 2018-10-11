@@ -12,7 +12,9 @@ std::vector<double> VectorTSVReader::parseNextLine(std::string *vectorId){
         if (getline(this->inputFile, line)) {   // get a whole line
 
             std::stringstream ss(line);
-            getline(ss, (*vectorId), '\t');
+            getline(ss, part, '\t');
+
+            (*vectorId) = part;
 
             while (getline(ss, part, '\t')) {
                 std::stringstream xstream(part);
