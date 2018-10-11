@@ -8,7 +8,7 @@ TEST(testNDVector, check_initialization1) {
     NDVector v = NDVector(xs);
 
     for (int i=0; i<xs.size(); i++){
-        EXPECT_EQ(v.coords[i], xs[i]);
+        EXPECT_EQ(v[i], xs[i]);
     }
 }
 
@@ -18,7 +18,7 @@ TEST(testNDVector, check_initialization2) {
     NDVector v = NDVector({1, 2, 3});
 
     for (int i=0; i<xs.size(); i++){
-        EXPECT_EQ(v.coords[i], xs[i]);
+        EXPECT_EQ(v[i], xs[i]);
     }
 }
 

@@ -42,7 +42,7 @@ public:
 
 
 
-    // member variables
+private:
     std::vector<double> coords;
 };
 
