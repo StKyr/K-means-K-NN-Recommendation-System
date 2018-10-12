@@ -51,9 +51,11 @@ void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
     }
 }
 
+void EuclideanSpaceLSH::insertDataset(std::unordered_map<std::string, NDVector> X){
 
+    for (auto pair: X) this->insertVector(pair.second, pair.first);
 
-
+}
 
 
 

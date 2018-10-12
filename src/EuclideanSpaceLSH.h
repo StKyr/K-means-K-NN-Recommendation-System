@@ -8,6 +8,7 @@
 #include <vector>
 #include <tuple>
 #include <set>
+#include <unordered_map>
 
 #include "NDVector.h"
 
@@ -20,7 +21,9 @@ class EuclideanSpaceLSH {
 public:
                           EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, int w);
     void                  insertVector     (NDVector p, std::string vectorId);
+    void                  insertDataset    (std::unordered_map<std::string, NDVector> X);
     std::set<std::string> retireveNeighbors(NDVector p);
+
 
 private:
     int L;
