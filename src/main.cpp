@@ -6,6 +6,7 @@
 #include <NearestNeighborSearch.h>
 
 void parse_command_line_arguments(int argc, char *argv[]);
+std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader);
 namespace Params {
     std::string input_file;
     std::string query_file;
@@ -15,46 +16,47 @@ namespace Params {
 }
 
 int main(int argc, char *argv[]) {
-
     parse_command_line_arguments(argc, argv);
 
-    std::cout << "Hello, World!" << std::endl;
-
-    QuerysetReader reader ("../input/queryset1.tsv");
-    //DatasetReader reader ("../input/input1.tsv");
-
-    reader.initialize();
-    reader.parseFirstLine();
-
-    std::cout << reader.R <<std::endl;
-    //std::cout << reader.metric << std::endl;
-
-
-    std::string s;
-    std::vector<double> xs;
-    int i;
-    xs = reader.parseNextLine(&s);
-
     std::unordered_map<std::string, NDVector> X;
+    std::unordered_map<std::string, NDVector> Y;
 
-    while (! xs.empty()) {
-        NDVector v(xs);
-        std::cout << v << std::endl;
-        xs = reader.parseNextLine(&s);
-        X[s] = v;
-    }
 
-    std::pair<std::string, double> result;
-    result = nearestNeighbor(NDVector({0,0,0,0}), X, metrics::euclidean_distance);
+    DatasetReader dr ("../input/input1.tsv");
+    dr.initialize();
+    dr.parseFirstLine();
+    X = read_dataset(dr);
+    dr.finalize();
 
-    std::cout << result.first << std::endl;
-    std::cout << result.second << std::endl;
+    QuerysetReader qr ("../input/queryset1.tsv");
+    qr.initialize();
+    qr.parseFirstLine();
+    Y = read_dataset(qr);
+    qr.finalize();
+
 
     return 0;
+    \
 
 }
 
 
+
+std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader){
+
+    std::string s;
+    std::vector<double> xs;
+    std::unordered_map<std::string, NDVector> X;
+
+    xs = reader.parseNextLine(&s);
+    while (! xs.empty()) {
+        NDVector v(xs);
+        xs = reader.parseNextLine(&s);
+        X[s] = v;
+    }
+
+    return X;
+}
 
 
 void parse_command_line_arguments(int argc, char *argv[]){
