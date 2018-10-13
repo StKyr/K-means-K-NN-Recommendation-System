@@ -6,6 +6,9 @@
 #include <cstdlib>
 
 
+#ifdef DEVELOPMENT
+#include <gtest/gtest.h>
+#endif
 
 class hFunction {
 public:
@@ -15,16 +18,26 @@ private:
     int w;
     int t;
     NDVector v;
+
+
+#ifdef DEVELOPMENT
+private:
+    FRIEND_TEST(testhFunction, check_t_randomness);
+    FRIEND_TEST(testhFunction, check_v_randomness);
+    FRIEND_TEST(testhFunction, check_equal_t);
+    FRIEND_TEST(testhFunction, return_value_constraints);
+
+#endif
 };
 
 
 hFunction::hFunction(int w, int d) :w(w) {
-    std::random_device rd;  //Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
 
     std::uniform_int_distribution<> dist_uniform(0,w);
-    this->t = dist_uniform(gen);
+    while ((this->t = dist_uniform(gen)) == w) ;
 
 
     std::vector<double> v_coords;
@@ -39,7 +52,8 @@ hFunction::hFunction(int w, int d) :w(w) {
 
 
 int hFunction::operator () (NDVector p){
-    double x =   ( p.dot(v) + t ) / w;
+    double prod = v.dot(p);
+    double x    = ( prod + t ) / w;
     return static_cast <int> (std::floor(x));
 }
 
@@ -69,20 +83,40 @@ typedef std::list<Bucket> BucketList;
 
 class HashTable {
 public:
-    explicit   HashTable      (int size)                                   : size(size) {array.reserve((unsigned long)size);}
+    explicit   HashTable      (int size);
     std::vector<std::string>   getVectorIds(int position, int originalKey);
-    void       insert         (int position, Bucket bucket)                { array[position].emplace_back(bucket);}
+    void       insert         (int position, Bucket bucket);
+              ~HashTable      ()     = default;          //                             {for (BucketList *pList : this->array) delete pList;}
 
 private:
     int size;
-    std::vector<BucketList> array;
+    std::vector<BucketList > array;
 };
+
+
+HashTable::HashTable(int size)
+:size(size){
+
+    this->array.reserve((unsigned)size);
+    for (int i=0; i<size; i++) {
+        this->array.emplace_back(BucketList());
+    }
+}
+
+
+
+
+void HashTable::insert(int position, Bucket bucket) {
+    this->array[position].emplace_back(bucket);
+
+}
+
 
 std::vector<std::string> HashTable::
 getVectorIds(int position, int originalKey){
     std::vector<std::string> vectorIds;
 
-    for (auto item : this->array[position]){
+    for (auto item : array[position]){
         if (item.g_key == originalKey){
             vectorIds.push_back(item.VectorId);
         }
@@ -135,12 +169,15 @@ EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, 
     R.reserve(l);
     for (int i=0; i<L; i++){
 
+        H.emplace_back(std::vector<hFunction>());
+        R.emplace_back(std::vector<hFunction>());
+
         H[i].reserve((unsigned long)k);
         R[i].reserve((unsigned long)k);
 
         for (int j=0; j<k; j++){
 
-            while ((r = rand()) <= 0);    //TODO: change rand() to something of C++
+            r = rand();    //TODO: change rand() to something of C++
 
             H[i].emplace_back( hFunction(w, d) );
             R[i].push_back(r);
@@ -228,7 +265,8 @@ int EuclideanSpaceLSH::phi(NDVector p, int j){
     }
 
     result = result % this->M;
-    result = result % this->tableSize;
+    result = result % (this->tableSize / 2);
+    result += (this->tableSize / 2);
     return result;
 }
 

@@ -19,3 +19,16 @@ add_executable(ergasia1 src/main.cpp include/NDVector.h src/NDVector.cpp src/Vec
 target_link_libraries(ergasia1 /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
 add_subdirectory(test)
+
+
+
+
+
+set(dev 1)
+
+if (dev)
+
+    target_compile_definitions(ergasia1 PRIVATE DEVELOPMENT)
+    include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
+endif(dev)
