@@ -20,8 +20,8 @@ namespace HyperParams {
 namespace Params {
     std::string input_file;
     std::string query_file;
-    int k;
-    int L;
+    int k = 3;
+    int L = 1;
     std::string output_file;
 }
 

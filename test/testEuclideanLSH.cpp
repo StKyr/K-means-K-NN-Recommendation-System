@@ -1,7 +1,195 @@
 #include <gtest/gtest.h>
 
 #include "EuclideanSpaceLSH.h"
-#include "EuclideanSpaceLSH.cpp" // FOR TESTING PURPOSES! -HAVE TO TEST HASH TABLE AND HFUNCTIONS
+
+
+
+TEST(testEuclideanLSH, initialize){
+
+        EuclideanSpaceLSH lsh (5,20, 65536, 3, 3, 4);
+}
+
+
+TEST(testEuclideanLSH, insert_single_vector){
+
+
+    EuclideanSpaceLSH lsh (1,5, 65536, 3, 2, 4);
+    NDVector v = {1, 2};
+    lsh.insertVector(v, "v1");
+}
+
+
+
+
+
+
+TEST(testEuclideanLSH, g_values_digits){
+
+    srand(time(NULL));
+
+    int k = 5;
+    int L = 1;
+    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+
+
+    for (int i=0; i<100; i++) {
+        std::vector<double> coords;
+        coords.push_back(rand() % 10);
+        coords.push_back(rand() % 10);
+        coords.push_back(rand() % 10);
+        NDVector v = NDVector(coords);
+        int g = lsh.g(v, 0);
+
+        EXPECT_GE(g, 10000);
+    }
+
+
+
+
+}
+
+TEST(testEuclideanLSH, g_values_exact){
+    int k = 5;
+    int L = 1;
+    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+
+    NDVector v1 = {1,2,3};
+    NDVector v2 = {1,2,3};
+
+    EXPECT_EQ(lsh.g(v1,0),lsh.g(v2,0));
+}
+
+TEST(testEuclideanLSH, g_values_nearby){
+    int k = 5;
+    int L = 1;
+    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+
+    NDVector v1 = {1,2,3};
+    NDVector v2 = {1.01,2.02,3.03};
+
+    NDVector q = {-100, 2222, 325};
+
+    EXPECT_EQ(lsh.g(v1,0),lsh.g(v2,0));
+    EXPECT_NE(lsh.g(v1,0), lsh.g(q,0));
+}
+
+
+TEST(testEuclideanLSH, insert_multiple_vectors){
+
+
+#define DEBUG
+
+    EuclideanSpaceLSH lsh (1,10, 65536, 5, 3, 5);
+
+    lsh.insertVector(NDVector({1, 2, 3}), "v1");
+    lsh.insertVector(NDVector({1.1, 2.1, 3.1}), "v2");
+    lsh.insertVector(NDVector({7, 8, 9}), "v3");
+    lsh.insertVector(NDVector({11, 21, 10}), "v4");
+    lsh.insertVector(NDVector({13, 22, 34}), "v5");
+    lsh.insertVector(NDVector({133, 222, 34}), "v6");
+    lsh.insertVector(NDVector({12, 211, 33}), "v7");
+    lsh.insertVector(NDVector({1222, 222, 344}), "v8");
+}
+TEST(testEuclideanLSH, insert_dataset){
+
+
+    EuclideanSpaceLSH lsh (1,10, 65536, 5, 3, 5);
+
+
+    std::unordered_map<std::string, NDVector> map;
+    map["v1"] = NDVector({1, 2, 3});
+    map["v2"] = NDVector({1.1, 2.1, 3.1});
+    map["v3"] = NDVector({7, 8, 9});
+    map["v4"] = NDVector({11, 21, 10});
+    map["v5"] = NDVector({13, 22, 34});
+    map["v6"] = NDVector({133, 222, 34});
+    map["v7"] = NDVector({12, 211, 33});
+    map["v8"] = NDVector({1, 2, 344});
+
+    lsh.insertDataset(map);
+
+
+
+
+}
+TEST(testEuclideanLSH, retrieve_trivial_1){
+
+
+    EuclideanSpaceLSH lsh (2,5, 65536, 3, 2, 4);
+    NDVector v = {1, 2};
+    lsh.insertVector(v, "v1");
+
+    auto resIds = lsh.retrieveNeighbors(NDVector({1.5,1.4}));
+
+    EXPECT_EQ(resIds.size(), 1);
+    EXPECT_NE(resIds.find("v1"), resIds.end());
+}
+
+
+TEST(testEuclideanLSH, retrieve_existing){
+
+    EuclideanSpaceLSH lsh (2,10, 65536, 5, 3, 5);
+
+
+    std::unordered_map<std::string, NDVector> map;
+    map["v1"] = NDVector({1, 2, 3});
+    map["v2"] = NDVector({1.1, 2.1, 3.1});
+    map["v3"] = NDVector({7, 8, 9});
+    map["v4"] = NDVector({11, 21, 10});
+    map["v5"] = NDVector({13, 22, 34});
+    map["v6"] = NDVector({133, 222, 34});
+    map["v7"] = NDVector({12, 211, 33});
+    map["v8"] = NDVector({1222, 222, 344});
+    map["!"] = NDVector({-10000,-10000, -10000});
+
+    lsh.insertDataset(map);
+
+    auto resIds = lsh.retrieveNeighbors({-10000,-10000, -10000});
+
+    EXPECT_GE(resIds.size(), 1);
+    EXPECT_NE(resIds.find("!"), resIds.end());
+}
+TEST(testEuclideanLSH, retrieve_batches){
+    FAIL() << "unimplemented";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 TEST(testhFunction, initialization){
     hFunction h(10,10);
@@ -74,7 +262,7 @@ TEST(testHT, initialization){
 TEST(testHT, single_element){
     HashTable ht(5);
 
-    ht.insert(3,make_Bucket(542, "s1"));
+    ht.insert(3, make_a_Bucket(542, "s1"));
 
     std::vector<std::string> result = ht.getVectorIds(3,542);
 
@@ -87,11 +275,11 @@ TEST(testHT, single_list){
 
     HashTable ht(5);
 
-    ht.insert(0,make_Bucket(30303030, "s1"));
-    ht.insert(0,make_Bucket(30303030, "s2"));
-    ht.insert(0,make_Bucket(30303030, "s3"));
-    ht.insert(0,make_Bucket(30303030, "s4"));
-    ht.insert(0,make_Bucket(30303030, "s5"));
+    ht.insert(0, make_a_Bucket(30303030, "s1"));
+    ht.insert(0, make_a_Bucket(30303030, "s2"));
+    ht.insert(0, make_a_Bucket(30303030, "s3"));
+    ht.insert(0, make_a_Bucket(30303030, "s4"));
+    ht.insert(0, make_a_Bucket(30303030, "s5"));
 
     std::vector<std::string> result = ht.getVectorIds(0,30303030);
 
@@ -108,23 +296,23 @@ TEST(testHT, multiple_lists){
 
     HashTable ht(5);
 
-    ht.insert(0,make_Bucket(100, "s01"));
-    ht.insert(0,make_Bucket(100, "s02"));
-    ht.insert(0,make_Bucket(100, "s03"));
-    ht.insert(0,make_Bucket(100, "s04"));
-    ht.insert(0,make_Bucket(100, "s05"));
+    ht.insert(0, make_a_Bucket(100, "s01"));
+    ht.insert(0, make_a_Bucket(100, "s02"));
+    ht.insert(0, make_a_Bucket(100, "s03"));
+    ht.insert(0, make_a_Bucket(100, "s04"));
+    ht.insert(0, make_a_Bucket(100, "s05"));
 
-    ht.insert(2,make_Bucket(200, "s21"));
-    ht.insert(2,make_Bucket(200, "s22"));
-    ht.insert(2,make_Bucket(200, "s23"));
-    ht.insert(2,make_Bucket(200, "s24"));
-    ht.insert(2,make_Bucket(200, "s25"));
+    ht.insert(2, make_a_Bucket(200, "s21"));
+    ht.insert(2, make_a_Bucket(200, "s22"));
+    ht.insert(2, make_a_Bucket(200, "s23"));
+    ht.insert(2, make_a_Bucket(200, "s24"));
+    ht.insert(2, make_a_Bucket(200, "s25"));
 
-    ht.insert(4,make_Bucket(300, "s41"));
-    ht.insert(4,make_Bucket(300, "s42"));
-    ht.insert(4,make_Bucket(300, "s43"));
-    ht.insert(4,make_Bucket(300, "s44"));
-    ht.insert(4,make_Bucket(300, "s45"));
+    ht.insert(4, make_a_Bucket(300, "s41"));
+    ht.insert(4, make_a_Bucket(300, "s42"));
+    ht.insert(4, make_a_Bucket(300, "s43"));
+    ht.insert(4, make_a_Bucket(300, "s44"));
+    ht.insert(4, make_a_Bucket(300, "s45"));
 
 
     std::vector<std::string> result0 = ht.getVectorIds(0,100);
@@ -160,11 +348,11 @@ TEST(testHT, multiple_lists){
 TEST(testHT, different_keys){
     HashTable ht(5);
 
-    ht.insert(0,make_Bucket(10, "s1"));
-    ht.insert(0,make_Bucket(11, "s2"));
-    ht.insert(0,make_Bucket(10, "s3"));
-    ht.insert(0,make_Bucket(11, "s4"));
-    ht.insert(0,make_Bucket(10, "s5"));
+    ht.insert(0, make_a_Bucket(10, "s1"));
+    ht.insert(0, make_a_Bucket(11, "s2"));
+    ht.insert(0, make_a_Bucket(10, "s3"));
+    ht.insert(0, make_a_Bucket(11, "s4"));
+    ht.insert(0, make_a_Bucket(10, "s5"));
 
     std::vector<std::string> result10 = ht.getVectorIds(0,10);
 
@@ -183,9 +371,9 @@ TEST(testHT, multiple_lists_different_keys){
 
     HashTable ht(5);
 
-    ht.insert(0,make_Bucket(100, "s01"));
-    ht.insert(0,make_Bucket(110, "s02"));
-    ht.insert(0,make_Bucket(100, "s03"));
+    ht.insert(0, make_a_Bucket(100, "s01"));
+    ht.insert(0, make_a_Bucket(110, "s02"));
+    ht.insert(0, make_a_Bucket(100, "s03"));
 
     std::vector<std::string> result0_100 = ht.getVectorIds(0,100);
     EXPECT_EQ(result0_100.size(),2);
@@ -199,9 +387,9 @@ TEST(testHT, multiple_lists_different_keys){
 
 
 
-    ht.insert(2,make_Bucket(200, "s21"));
-    ht.insert(2,make_Bucket(100, "s22"));
-    ht.insert(2,make_Bucket(110, "s23"));
+    ht.insert(2, make_a_Bucket(200, "s21"));
+    ht.insert(2, make_a_Bucket(100, "s22"));
+    ht.insert(2, make_a_Bucket(110, "s23"));
 
     std::vector<std::string> result2_200 = ht.getVectorIds(2,200);
     EXPECT_EQ(result2_200.size(),1);
@@ -218,10 +406,10 @@ TEST(testHT, multiple_lists_different_keys){
 
 
 
-    ht.insert(4,make_Bucket(300, "s41"));
-    ht.insert(4,make_Bucket(200, "s42"));
-    ht.insert(4,make_Bucket(100, "s43"));
-    ht.insert(4,make_Bucket(100, "s44"));
+    ht.insert(4, make_a_Bucket(300, "s41"));
+    ht.insert(4, make_a_Bucket(200, "s42"));
+    ht.insert(4, make_a_Bucket(100, "s43"));
+    ht.insert(4, make_a_Bucket(100, "s44"));
 
     std::vector<std::string> result4_300 = ht.getVectorIds(4,300);
     EXPECT_EQ(result4_300.size(),1);
