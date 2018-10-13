@@ -13,7 +13,7 @@ endif()]]
 
 include_directories(include src test /home/kyriakos/Apps/tools/boost_1_68_0)
 
-add_executable(ergasia1 src/main.cpp include/NDVector.h src/NDVector.cpp src/VectorTSVReader.cpp include/VectorTSVReader.h src/DatasetReader.cpp include/DatasetReader.h include/metrics.h src/QuerysetReader.cpp include/QuerysetReader.h src/metrics.cpp src/NearestNeighborSearch.cpp include/NearestNeighborSearch.h src/EuclideanSpaceLSH.h src/EuclideanSpaceLSH.cpp)
+add_executable(ergasia1 src/main.cpp include/NDVector.h src/NDVector.cpp src/VectorTSVReader.cpp include/VectorTSVReader.h src/DatasetReader.cpp include/DatasetReader.h include/metrics.h src/QuerysetReader.cpp include/QuerysetReader.h src/metrics.cpp src/NearestNeighborSearch.cpp include/NearestNeighborSearch.h include/EuclideanSpaceLSH.h src/EuclideanSpaceLSH.cpp)
 
 
 target_link_libraries(ergasia1 /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
