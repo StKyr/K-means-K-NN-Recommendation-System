@@ -1,0 +1,14 @@
+//
+// Created by kyriakos on 10/14/18.
+//
+
+#ifndef ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
+#define ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
+
+
+class EuclideanHypercubeProjection {
+
+};
+
+
+#endif //ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
