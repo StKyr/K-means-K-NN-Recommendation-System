@@ -10,7 +10,7 @@
 
 
 
-hFunction::hFunction(int w, int d) :w(w) {
+EuclideanSpaceLSH::hFunction::hFunction(int w, int d) :w(w) {
     std::random_device rd;
     std::mt19937 gen(rd());
 
@@ -30,77 +30,13 @@ hFunction::hFunction(int w, int d) :w(w) {
 }
 
 
-int hFunction::operator () (NDVector p){
+int EuclideanSpaceLSH::hFunction::operator () (NDVector p){
     double prod = v.dot(p);
     double x    = ( prod + t ) / w;
     int y =  static_cast <int> (std::floor(x));
     int z  = y + ((x > 0 ) ? 1 : -1); //TODO: mention that!!
     return z;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-HashTable::HashTable(int size)
-:size(size){
-
-    this->array.reserve((unsigned)size);
-    for (int i=0; i<size; i++) {
-        this->array.emplace_back(BucketList());
-    }
-}
-
-
-
-
-void HashTable::insert(int position, Bucket bucket) {
-    this->array[position].emplace_back(bucket);
-
-}
-
-
-std::vector<std::string> HashTable::
-getVectorIds(int position, int originalKey){
-    std::vector<std::string> vectorIds;
-
-    for (auto item : array[position]){
-        if (item.g_key == originalKey){
-            vectorIds.push_back(item.VectorId);
-        }
-    }
-    return vectorIds;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -188,6 +124,8 @@ void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
         bucket.VectorId = vectorId;
 
         this->hashTables[i].insert(hashKey, bucket);
+
+
     }
 
 #endif
