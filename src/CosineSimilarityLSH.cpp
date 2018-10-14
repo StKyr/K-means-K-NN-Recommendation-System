@@ -1,7 +1,10 @@
 #include <random>
 #include "CosineSimilarityLSH.h"
 
-CosineSimilarityLSH::hFunction::hFunction(int d) {
+
+using namespace cosine;
+
+hFunction::hFunction(int d) {
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -16,7 +19,7 @@ CosineSimilarityLSH::hFunction::hFunction(int d) {
     this->r = NDVector(r_coords);
 }
 
-int CosineSimilarityLSH::hFunction::operator()(NDVector p) {
+int hFunction::operator()(NDVector p) {
     return (this->r.dot(p) >= 0) ? 1 : 0;
 }
 

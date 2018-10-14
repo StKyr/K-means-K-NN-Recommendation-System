@@ -1,13 +1,23 @@
-//
-// Created by kyriakos on 10/14/18.
-//
-
 #ifndef ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
 #define ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
 
 
-class EuclideanHypercubeProjection {
+#include <NDVector.h>
 
+class EuclideanHypercubeProjection {
+public:
+    EuclideanHypercubeProjection(int d_, int M, int probes);
+
+
+
+
+private:
+    int d_;
+    int M;
+    int probes;
+
+
+    int f(NDVector p, int ( * h) (NDVector p) );
 };
 
 

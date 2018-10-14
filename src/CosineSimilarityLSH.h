@@ -9,6 +9,18 @@
 #include <LSH.h>
 #include "HashTable.h"
 
+
+namespace cosine{
+    class hFunction {
+    public:
+        explicit hFunction (int d);
+        int operator () (NDVector p);
+    private:
+        NDVector r;
+    };
+
+}
+
 class CosineSimilarityLSH :public LSH{
 
 
@@ -20,31 +32,16 @@ public:
 
 
 private:
-    class hFunction;
 
     //int tableSize;
     int L;
     int k;
 
-    std::vector<std::vector<hFunction>> H;
+    std::vector<std::vector<cosine::hFunction>> H;
     std::vector<HashTable> hashTables;
 
 
     int g  (NDVector p, int i);
-
-
-
-
-
-
-    class hFunction {
-    public:
-        explicit hFunction (int d);
-        int operator () (NDVector p);
-    private:
-        NDVector r;
-    };
-
 
 };
 
