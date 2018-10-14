@@ -4,57 +4,100 @@
 #include <QuerysetReader.h>
 #include <boost/program_options.hpp>
 #include <NearestNeighborSearch.h>
+#include <EuclideanSpaceLSH.h>
+
 
 void parse_command_line_arguments(int argc, char *argv[]);
+std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader);
+
+
+namespace HyperParams {
+    int M = 4;  //TODO: check value
+    int w = 4;
+}
+
+
 namespace Params {
     std::string input_file;
     std::string query_file;
-    int k;
-    int L;
+    int k = 3;
+    int L = 1;
     std::string output_file;
 }
 
 int main(int argc, char *argv[]) {
-
     parse_command_line_arguments(argc, argv);
 
-    std::cout << "Hello, World!" << std::endl;
-
-    QuerysetReader reader ("../input/queryset1.tsv");
-    //DatasetReader reader ("../input/input1.tsv");
-
-    reader.initialize();
-    reader.parseFirstLine();
-
-    std::cout << reader.R <<std::endl;
-    //std::cout << reader.metric << std::endl;
-
-
-    std::string s;
-    std::vector<double> xs;
-    int i;
-    xs = reader.parseNextLine(&s);
-
     std::unordered_map<std::string, NDVector> X;
+    std::unordered_map<std::string, NDVector> Y;
 
-    while (! xs.empty()) {
-        NDVector v(xs);
-        std::cout << v << std::endl;
-        xs = reader.parseNextLine(&s);
-        X[s] = v;
+    DatasetReader dr ("../input/input1.tsv");
+    dr.initialize();
+    dr.parseFirstLine();
+    X = read_dataset(dr);
+    dr.finalize();
+
+    QuerysetReader qr ("../input/queryset1.tsv");
+    qr.initialize();
+    qr.parseFirstLine();
+    Y = read_dataset(qr);
+    qr.finalize();
+
+    int N = (int)X.size();
+    int d = 4; //TODO: have parsers save the dimension -- MUST
+
+    EuclideanSpaceLSH lsh (Params::L, N/2, HyperParams::M, Params::k, d, HyperParams::w);
+
+    lsh.insertDataset(X);
+    std::set<std::string> possibleNeighborIds;
+    std::vector<std::string> neighborIds;
+    std::unordered_map<std::string, NDVector> possibleNeighbors;
+    std::vector<NDVector> neighbors;
+
+    NDVector q, neighbor;
+
+    for (auto item : Y){
+        NDVector q = item.second;
+
+        std::cout << q << std::endl;
+
+        possibleNeighborIds = lsh.retrieveNeighbors(q);
+        possibleNeighbors.clear();
+        for (auto id : possibleNeighborIds){
+            possibleNeighbors[id] =  X[id] ;
+        }
+
+        neighborIds = k_nearestNeighbors(q, 2, possibleNeighbors, metrics::euclidean_distance); //TODO: correct call
+        neighbors.clear();
+        for (auto id: neighborIds){
+            std::cout << possibleNeighbors[id] << std::endl;
+        }
     }
 
-    std::pair<std::string, double> result;
-    result = nearestNeighbor(NDVector({0,0,0,0}), X, metrics::euclidean_distance);
 
-    std::cout << result.first << std::endl;
-    std::cout << result.second << std::endl;
+
 
     return 0;
 
 }
 
 
+
+std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader){
+
+    std::string s;
+    std::vector<double> xs;
+    std::unordered_map<std::string, NDVector> X;
+
+    xs = reader.parseNextLine(&s);
+    while (! xs.empty()) {
+        NDVector v(xs);
+        xs = reader.parseNextLine(&s);
+        X[s] = v;
+    }
+
+    return X;
+}
 
 
 void parse_command_line_arguments(int argc, char *argv[]){
