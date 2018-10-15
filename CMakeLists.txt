@@ -13,7 +13,7 @@ endif()]]
 
 include_directories(include src test /home/kyriakos/Apps/tools/boost_1_68_0)
 
-add_executable(ergasia1 src/main.cpp include/NDVector.h src/NDVector.cpp src/VectorTSVReader.cpp include/VectorTSVReader.h src/DatasetReader.cpp include/DatasetReader.h include/metrics.h src/QuerysetReader.cpp include/QuerysetReader.h src/metrics.cpp src/NearestNeighborSearch.cpp include/NearestNeighborSearch.h include/EuclideanSpaceLSH.h src/EuclideanSpaceLSH.cpp src/CosineSimilarityLSH.cpp src/CosineSimilarityLSH.h src/HashTable.cpp src/HashTable.h include/LSH.h src/EuclideanHypercubeProjection.cpp src/EuclideanHypercubeProjection.h include/HypercubeProjection.h include/HypercubeProjection.cpp)
+add_executable(ergasia1 src/LSH.cpp include/NDVector.h src/NDVector.cpp src/VectorTSVReader.cpp include/VectorTSVReader.h src/DatasetReader.cpp include/DatasetReader.h include/metrics.h src/QuerysetReader.cpp include/QuerysetReader.h src/metrics.cpp src/NearestNeighborSearch.cpp include/NearestNeighborSearch.h include/EuclideanSpaceLSH.h src/EuclideanSpaceLSH.cpp src/CosineSimilarityLSH.cpp include/CosineSimilarityLSH.h src/HashTable.cpp include/HashTable.h include/LSH.h src/EuclideanHypercubeProjection.cpp include/EuclideanHypercubeProjection.h include/HypercubeProjection.h scr/HypercubeProjection.cpp)
 
 
 target_link_libraries(ergasia1 /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)

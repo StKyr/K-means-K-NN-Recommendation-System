@@ -2,7 +2,7 @@
 #define ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
 
 
-#include <NDVector.h>
+/*#include <NDVector.h>
 
 class EuclideanHypercubeProjection {
 public:
@@ -18,7 +18,7 @@ private:
 
 
     int f(NDVector p, int ( * h) (NDVector p) );
-};
+};*/
 
 
 #endif //ERGASIA1_EUCLIDEANHYPERCUBEPROJECTION_H
