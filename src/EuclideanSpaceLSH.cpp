@@ -7,10 +7,10 @@
 
 
 
+using namespace euclidean;
 
 
-
-EuclideanSpaceLSH::hFunction::hFunction(int w, int d) :w(w) {
+hFunction::hFunction(int w, int d) :w(w) {
     std::random_device rd;
     std::mt19937 gen(rd());
 
@@ -30,7 +30,7 @@ EuclideanSpaceLSH::hFunction::hFunction(int w, int d) :w(w) {
 }
 
 
-int EuclideanSpaceLSH::hFunction::operator () (NDVector p){
+int hFunction::operator () (NDVector p){
     double prod = v.dot(p);
     double x    = ( prod + t ) / w;
     int y =  static_cast <int> (std::floor(x));
