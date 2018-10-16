@@ -49,7 +49,7 @@ add_executable(hypercube src/LSH.cpp include/NDVector.h
         src/EuclideanHypercubeProjection.cpp
         include/EuclideanHypercubeProjection.h
         include/HypercubeProjection.h
-        scr/HypercubeProjection.cpp)
+        src/HypercubeProjection.cpp)
 target_link_libraries(hypercube /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
 

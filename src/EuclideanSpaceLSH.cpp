@@ -175,9 +175,9 @@ int EuclideanSpaceLSH::g(NDVector p, int j){
 
 
 
-int EuclideanSpaceLSH::phi(NDVector p, int j){
+int EuclideanSpaceLSH::phi(NDVector p, int j) {
 
-    std::vector<hFunction> &h = this->H[j];
+/*    std::vector<hFunction> &h = this->H[j];
     std::vector<int> &r = this->R[j];
 
     int result = 0;
@@ -196,6 +196,23 @@ int EuclideanSpaceLSH::phi(NDVector p, int j){
     result = result % (this->tableSize / 2);
     result += (this->tableSize / 2);
     return result;
+*/
+
+    std::vector<hFunction> &h = this->H[j];
+
+    std::stringstream ss("");
+
+    for (auto h_i : h){
+        ss << "," << h_i(p);
+    }
+
+    std::string key_str = ss.str();
+
+    std::hash<std::string> hash_str;
+
+    int key = (int) hash_str(key_str); //TODO: check if uint can be casted in int. Check keys types in general
+    return key % tableSize;
+
 }
 
 

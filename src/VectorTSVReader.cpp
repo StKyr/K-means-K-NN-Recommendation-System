@@ -119,14 +119,14 @@ void QuerysetReader::parseFirstLine(){
 
     if (this->inputFile.is_open()) {
 
-        if (!getline(this->inputFile, part)) {                                      // get first line of file
+/*        if (!getline(this->inputFile, part)) {                                      // get first line of file
             throw std::runtime_error("File \""+this->filename+"\" is empty");
-        }
+        }*/
 
         try {
 
             getline(inputFile, part, ' ');
-            if (ltrim(part) != "Radius:") throw std::runtime_error("Invalid first line of query set");
+            if (ltrim(part) != "Radius:") throw std::runtime_error("Invalid first line of file \""+this->filename+"\".");
 
             getline(inputFile, part);
             this->R = stod(ltrim(part));
