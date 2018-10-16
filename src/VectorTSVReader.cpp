@@ -1,5 +1,13 @@
 #include "VectorTSVReader.h"
 
+
+static inline std::string &ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                    std::not1(std::ptr_fun<int, int>(std::isspace))));
+    return s;
+}
+
+
 std::pair<std::string, std::vector<double>> VectorTSVReader::parseNextLine(){
 
     std::vector<double> v;
@@ -68,32 +76,37 @@ void DatasetReader::parseFirstLine() {
 
     if (this->inputFile.is_open()) {
 
-        getline(this->inputFile, line);                                             // get first line of file
+        if (!getline(this->inputFile, line)) {                                      // get first line of file
+            throw std::runtime_error("File \""+this->filename+"\" is empty");
+        }
+
+
         while(line.empty() || std::all_of(line.begin(), line.end(), isspace)) {     // throw away empty lines
             getline(this->inputFile, line);
         }
 
-        if (getline(this->inputFile, line)){                                        // get actual first line
+        int pos = (int)ltrim(line).find("euclidean");                               // search for "euclidean"
 
-            int pos = (int)line.find("euclidean");                                  // search for "euclidean"
+        if (pos == 0){                                                              // "euclidean" found at the beginning of line
+            this->metric = supported_metrics::Euclidean;
+            return;
 
-            if (pos != std::string::npos){                                          // metric was "euclidean"
-                this->metric = supported_metrics::Euclidean;
-                return;
+        }else if (pos == std::string::npos){
+            pos = (int)ltrim(line).find("cosine");                                  // search for "cosine"
 
-            }else{
-                pos = (int)line.find("cosine");                                     // search for "cosine"
+            if (pos == 0) {                                                         // which was found at the beginning of file
+                this->metric = supported_metrics::Cosine;
+            }else if (pos == std::string::npos){                                    // metric is missing
+                this->metric = supported_metrics::Euclidean;                        // assume Euclidean
+            }else{                                                                  // "cosine" was found somewhere in the line
 
-                if (pos != std::string::npos) {                                     // which was found
-                    this->metric = supported_metrics::Cosine;
-                }else{                                                              // metric is missing
-                    this->metric = supported_metrics::Euclidean;                    // assume Euclidean
-                }
+                throw std::runtime_error("Invalid first line of file \""+this->filename+"\"");
             }
+        }else{                                                                      // "euclidean was found somewhere in the line
 
-        }else{
-            throw std::runtime_error("File \""+this->filename+"\" is empty");
+            throw std::runtime_error("Invalid first line of file \""+this->filename+"\"");
         }
+
 
     }else{
         throw std::runtime_error("Cannot open \""+this->filename+"\" file.");
@@ -106,13 +119,17 @@ void QuerysetReader::parseFirstLine(){
 
     if (this->inputFile.is_open()) {
 
+        if (!getline(this->inputFile, part)) {                                      // get first line of file
+            throw std::runtime_error("File \""+this->filename+"\" is empty");
+        }
+
         try {
 
             getline(inputFile, part, ' ');
-            if (part != "Radius:") throw std::runtime_error("Invalid first line of query set");
+            if (ltrim(part) != "Radius:") throw std::runtime_error("Invalid first line of query set");
 
             getline(inputFile, part);
-            this->R = stod(part);
+            this->R = stod(ltrim(part));
 
 
             if (this->R < 0) {

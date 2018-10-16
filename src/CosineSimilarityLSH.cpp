@@ -61,7 +61,8 @@ int CosineSimilarityLSH::g(NDVector p, int i) {
 void CosineSimilarityLSH::insertVector(NDVector p, std::string vectorId) {
     for (int i=0; i<this->L; i++) {
         int hashKey = this->g(p, i); //TODO: MOD FUCKIN TABLESIZE!!!!
-        this->hashTables[i].insert(hashKey, make_Bucket(hashKey, vectorId));
+        Bucket bucket = {hashKey = hashKey, vectorId = vectorId};
+        this->hashTables[i].insert(hashKey, bucket);
     }
 }
 

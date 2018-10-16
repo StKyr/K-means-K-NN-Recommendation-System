@@ -1,7 +1,5 @@
 #include <iostream>
 #include <NDVector.h>
-#include <DatasetReader.h>
-#include <QuerysetReader.h>
 #include <boost/program_options.hpp>
 #include <NearestNeighborSearch.h>
 #include <EuclideanSpaceLSH.h>
