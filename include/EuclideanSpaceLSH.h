@@ -19,38 +19,7 @@
 #endif
 
 
-class EuclideanSpaceLSH :public LSH{
-public:
-                          EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, int w);
-    void                  insertVector     (NDVector p, std::string vectorId);
-    void                  insertDataset    (std::unordered_map<std::string, NDVector> X);
-    std::set<std::string> retrieveNeighbors(NDVector p);
-
-
-private:
-    class hFunction;
-
-    int L;
-    int tableSize;
-    int M;
-
-    std::vector<std::vector<hFunction>> H;
-    std::vector<std::vector<int>>       R;
-    std::vector<HashTable>              hashTables;
-
-
-    int g  (NDVector p, int j);
-    int phi(NDVector p, int j);
-
-
-#ifdef DEVELOPMENT
-    FRIEND_TEST(testEuclideanLSH, g_values_digits);
-    FRIEND_TEST(testEuclideanLSH, g_values_exact);
-    FRIEND_TEST(testEuclideanLSH, g_values_nearby);
-
-#endif
-
-
+namespace euclidean{
 
 
     class hFunction {
@@ -72,6 +41,45 @@ private:
 
 #endif
     };
+
+
+
+}
+
+
+class EuclideanSpaceLSH : public LSH{
+public:
+                          EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, int w);
+    void                  insertVector     (NDVector p, std::string vectorId);
+    void                  insertDataset    (std::unordered_map<std::string, NDVector> X);
+    std::set<std::string> retrieveNeighbors(NDVector p);
+
+
+private:
+
+    int L;
+    int tableSize;
+    int M;
+
+    std::vector<std::vector<euclidean::hFunction>> H;
+    std::vector<std::vector<int>>       R; //TODO: remove that -> change to single
+    std::vector<HashTable>              hashTables;
+
+
+    int g  (NDVector p, int j);
+    int phi(NDVector p, int j);
+
+
+#ifdef DEVELOPMENT
+    FRIEND_TEST(testEuclideanLSH, g_values_digits);
+    FRIEND_TEST(testEuclideanLSH, g_values_exact);
+    FRIEND_TEST(testEuclideanLSH, g_values_nearby);
+
+#endif
+
+
+
+
 };
 
 
