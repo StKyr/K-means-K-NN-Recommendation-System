@@ -1,10 +1,10 @@
 #include <iostream>
 #include <NDVector.h>
-#include <DatasetReader.h>
-#include <QuerysetReader.h>
 #include <boost/program_options.hpp>
 #include <NearestNeighborSearch.h>
 #include <EuclideanSpaceLSH.h>
+#include <metrics.h>
+#include <VectorTSVReader.h>
 
 
 void parse_command_line_arguments(int argc, char *argv[]);
@@ -28,23 +28,30 @@ namespace Params {
 int main(int argc, char *argv[]) {
     parse_command_line_arguments(argc, argv);
 
-    std::unordered_map<std::string, NDVector> X;
-    std::unordered_map<std::string, NDVector> Y;
+    Dataset           X;
+    Dataset           Y;
+    supported_metrics metric = _NULL;
+    double            R;
+    int               d;
 
-    DatasetReader dr ("../input/input1.tsv");
-    dr.initialize();
-    dr.parseFirstLine();
-    X = read_dataset(dr);
-    dr.finalize();
 
-    QuerysetReader qr ("../input/queryset1.tsv");
-    qr.initialize();
-    qr.parseFirstLine();
-    Y = read_dataset(qr);
-    qr.finalize();
 
+    DatasetReader dr("../input/input1.tsv");
+    X = dr.readDataset();
+    metric = dr.metric;
+    d = dr.vectorDim;
+
+    QuerysetReader qr("../input/queryset1.tsv");
+    Y = qr.readDataset();
+    R = qr.R;
+
+    if (dr.vectorDim != qr.vectorDim) throw std::runtime_error("Input datasets have different dimensions.");
+
+
+
+
+/*
     int N = (int)X.size();
-    int d = 4; //TODO: have parsers save the dimension -- MUST
 
     EuclideanSpaceLSH lsh (Params::L, N/2, HyperParams::M, Params::k, d, HyperParams::w);
 
@@ -73,32 +80,13 @@ int main(int argc, char *argv[]) {
             std::cout << possibleNeighbors[id] << std::endl;
         }
     }
+*/
 
 
 
 
     return 0;
-
 }
-
-
-
-std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader){
-
-    std::string s;
-    std::vector<double> xs;
-    std::unordered_map<std::string, NDVector> X;
-
-    xs = reader.parseNextLine(&s);
-    while (! xs.empty()) {
-        NDVector v(xs);
-        xs = reader.parseNextLine(&s);
-        X[s] = v;
-    }
-
-    return X;
-}
-
 
 void parse_command_line_arguments(int argc, char *argv[]){
 

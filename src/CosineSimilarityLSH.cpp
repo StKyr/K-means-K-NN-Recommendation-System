@@ -40,7 +40,7 @@ CosineSimilarityLSH::CosineSimilarityLSH(int L, int k, int d) :k(k), L(L) {
         hashTables.emplace_back(HashTable(tableSize));
 
         H.emplace_back(std::vector<hFunction>());
-        H[i].reserve(k);
+        H[i].reserve(k); //TDOD: k is not a sensible!!!!!
         for (int j = 0; j < k; j++) H[i].emplace_back(hFunction(d));
     }
 }
@@ -60,8 +60,9 @@ int CosineSimilarityLSH::g(NDVector p, int i) {
 
 void CosineSimilarityLSH::insertVector(NDVector p, std::string vectorId) {
     for (int i=0; i<this->L; i++) {
-        int hashKey = this->g(p, i);
-        this->hashTables[i].insert(hashKey, make_Bucket(hashKey, vectorId));
+        int hashKey = this->g(p, i); //TODO: MOD FUCKIN TABLESIZE!!!!
+        Bucket bucket = {hashKey = hashKey, vectorId = vectorId};
+        this->hashTables[i].insert(hashKey, bucket);
     }
 }
 

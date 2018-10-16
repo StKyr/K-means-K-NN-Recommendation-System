@@ -12,12 +12,12 @@ typedef struct bucket_t{
 } Bucket;
 
 
-Bucket make_Bucket(int g_key, std::string vectorId) {
+/*Bucket make_Bucket(int g_key, std::string vectorId) {
     return Bucket{
             g_key    : g_key,
             VectorId : std::move(vectorId)
     };
-}
+}*/
 
 
 typedef std::list<Bucket> BucketList;
