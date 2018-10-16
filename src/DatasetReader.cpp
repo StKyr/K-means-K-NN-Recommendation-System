@@ -47,3 +47,46 @@ void DatasetReader::parseFirstLine(){
         throw std::runtime_error("File is not open");
     }
 }
+
+supported_metrics DatasetReader::parseFirstLine() {
+    std::string line;
+
+
+
+
+
+    if (this->inputFile.is_open()) {
+
+        getline(this->inputFile, line);
+        while(line.empty() || std::all_of(line.begin(), line.end(), isspace)) {
+            getline(this->inputFile, line);
+        }
+
+        if (---not ssread everything){
+
+            int pos = (int)line.find("euclidean");
+
+            if (pos != std::string::npos){
+                return supported_metrics::Euclidean;
+
+            }else{
+                pos = (int)line.find("cosine");
+
+                if (pos != std::string::npos) {
+                    return supported_metrics::Cosine;
+                }else{
+                    throw std::runtime_error("No s")
+                }
+
+            }
+
+
+
+        }else{
+            throw std::runtime_error("File is empty");
+        }
+
+    }else{
+        throw std::runtime_error("File is not open");
+    }
+}

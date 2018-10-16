@@ -4,6 +4,9 @@
 #include <string>
 #include "VectorTSVReader.h"
 
+
+//TODO: move class definition to single .h file
+
 class QuerysetReader :public VectorTSVReader {
 
 public:

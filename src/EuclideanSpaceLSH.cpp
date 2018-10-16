@@ -81,9 +81,6 @@ EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, 
 
 
 void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
-
-
-
 #ifdef DEBUG
     int hashKey;
     int g_key;
@@ -109,7 +106,6 @@ void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
     }
 
 #else
-
 
     int hashKey;
     int g_key;
