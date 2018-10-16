@@ -12,10 +12,10 @@ typedef std::string hammingNumber;
 
 class HypercubeProjection{
 public:
-                             HypercubeProjection(int d_, int M, int probes, int N)            : d_(d_), M(M), probes(probes) {}
-    void                     insertVector       (NDVector p, std::string vectorId)            ;
-    void                     insertDataset      (std::unordered_map<std::string, NDVector> X) ;
-    std::vector<std::string> retrieveNeighbors  (NDVector p)                                  ;
+                             HypercubeProjection(int d_, int M, int probes, int N)           : d_(d_), M(M), probes(probes) {}
+    void                     insertVector       (NDVector p, std::string vectorId)           ;
+    void                     insertDataset      (std::unordered_map<std::string, NDVector> X);
+    std::vector<std::string> retrieveNeighbors  (NDVector p)                                 ;
 
 
 

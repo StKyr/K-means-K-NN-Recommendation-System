@@ -62,7 +62,7 @@ private:
     int M;
 
     std::vector<std::vector<euclidean::hFunction>> H;
-    std::vector<std::vector<int>>       R;
+    std::vector<std::vector<int>>       R; //TODO: remove that -> change to single
     std::vector<HashTable>              hashTables;
 
 
