@@ -4,7 +4,7 @@
 
 #include "NDVector.h"
 
-enum supported_metrics {_NULL_, Euclidean, Cosine};
+enum supported_metrics {_NULL, Euclidean, Cosine};
 
 namespace metrics {
     double euclidean_distance(NDVector v, NDVector u);
