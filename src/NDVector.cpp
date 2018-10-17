@@ -18,12 +18,25 @@ unsigned long NDVector::dim() const{
 }
 
 double NDVector::norm(unsigned long p) const{
+
+    double sum = 0;
+    for (auto x: this->coords){
+        sum += pow(x,p);
+    }
+
+    double rootPower = (1.0/p);
+    double n = pow(sum, rootPower);
+    return n;
+
+/*
     std::vector<double> xs = std::vector<double>(this->dim());
 
     std::transform(this->coords.begin(), this->coords.end(), xs.begin(),
                    [=](double x) -> double {return pow(x,p);} );
 
     return pow(std::accumulate(xs.begin(), xs.end(), (double)0), (double)1/p);
+*/
+
 }
 
 

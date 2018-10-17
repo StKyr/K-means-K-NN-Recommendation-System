@@ -1,5 +1,7 @@
 #include "NearestNeighborSearch.h"
 #include <list>
+#include <iostream>
+#include <csignal>
 
 
 std::pair<std::string, double>  nearestNeighbor(NDVector q, std::unordered_map<std::string, NDVector> X, double (*dist)(NDVector, NDVector) ){
@@ -26,33 +28,24 @@ std::pair<std::string, double>  nearestNeighbor(NDVector q, std::unordered_map<s
 }
 
 
-std::vector<std::string> k_nearestNeighbors(NDVector q, int k, std::unordered_map<std::string, NDVector> X, double (*dist)(NDVector, NDVector) ){
-    //TODO: change to an O(N*k) implementation with a k-sized array/list
-    using namespace std;
+std::vector<std::string> range_nearestNeighbors(NDVector q, double R, std::unordered_map<std::string, NDVector> X, double (*dist)(NDVector, NDVector) ){
 
-    if (k>=X.size()) throw logic_error("kNN called with illegal k value");
-    if (k<=0) throw logic_error("kNN called with zero or negative k value");
+    if (R<=0) throw std::logic_error("Nearest Neighbor called with zero or negative R value");
+
+    std::vector<std::string> nearbyIds;
 
     double d;
-    vector< pair<double, string> > all_distances;
-
-    vector<string> closestIds;
-
+    NDVector p;
+    std::string vectorId;
 
     for (auto item : X){
         NDVector p = item.second;
+        vectorId = item.first;
 
         d = dist(q,p);
-
-        all_distances.emplace_back(make_pair(d,item.first));
+        if (d < R) {
+            nearbyIds.push_back(vectorId);
+        }
     }
-
-    sort(all_distances.begin(), all_distances.end());
-
-    int i=0;
-    for (auto it = all_distances.begin(); it != all_distances.end() && i<k; i++, ++it){
-        closestIds.push_back((*it).second);
-    }
-
-    return closestIds;
+    return nearbyIds;
 }

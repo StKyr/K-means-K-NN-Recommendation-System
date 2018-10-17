@@ -5,19 +5,19 @@
 #include <ctime>
 #include <cstdlib>
 
+std::vector<std::set<std::string>> allKeys;
 
 
-using namespace euclidean;
 
 
-hFunction::hFunction(int w, int d) :w(w) {
+hEucl::hEucl(int w, int d) :w(w) {
     std::random_device rd;
     std::mt19937 gen(rd());
 
 
     std::uniform_int_distribution<> dist_uniform(0,w);
     while ((this->t = dist_uniform(gen)) == w) ;
-
+//this->t = 0;
 
     std::vector<double> v_coords;
     v_coords.reserve((unsigned long)d);
@@ -30,11 +30,11 @@ hFunction::hFunction(int w, int d) :w(w) {
 }
 
 
-int hFunction::operator () (NDVector p){
+int hEucl::operator () (NDVector &p){
     double prod = v.dot(p);
     double x    = ( prod + t ) / w;
     int y =  static_cast <int> (std::floor(x));
-    int z  = y + ((x > 0 ) ? 1 : -1); //TODO: mention that!!
+    int z  = y + ((x > 0 ) ? 1 : -1);  //TODO: CHECK THIS
     return z;
 }
 
@@ -42,10 +42,11 @@ int hFunction::operator () (NDVector p){
 
 
 
-EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, int w)
-:L(L), tableSize(tableSize){
+EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int k, int d, int w)
+{
 
-    this->M = M;
+    this->L = L;
+    this->tableSize = tableSize;
 
     srand((unsigned int)time(nullptr));
 
@@ -61,7 +62,7 @@ EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, 
     R.reserve(l);
     for (int i=0; i<L; i++){
 
-        H.emplace_back(std::vector<hFunction>());
+        H.emplace_back(std::vector<hFunction *>());
         R.emplace_back(std::vector<int>());
 
         H[i].reserve((unsigned long)k);
@@ -69,11 +70,17 @@ EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, 
 
         for (int j=0; j<k; j++){
 
-            r = rand();    //TODO: change rand() to something of C++
+            r = rand() % 1000;    //TODO: change rand() to something of C++
 
-            H[i].emplace_back( hFunction(w, d) );
+            H[i].emplace_back(new  hEucl(w, d) );
             R[i].push_back(r);
         }
+
+
+
+
+
+        allKeys.emplace_back(std::set<std::string>());
     }
 }
 
@@ -107,9 +114,8 @@ void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
 
 #else
 
-    int hashKey;
-    int g_key;
-
+    unsigned hashKey;
+    std::string g_key;
 
     for (int i=0; i<this->L; i++){
         hashKey = this->phi(p, i);
@@ -120,6 +126,12 @@ void EuclideanSpaceLSH::insertVector(NDVector p, std::string vectorId){
         bucket.VectorId = vectorId;
 
         this->hashTables[i].insert(hashKey, bucket);
+
+
+
+
+
+        allKeys[i].insert(g_key);
 
 
     }
@@ -140,13 +152,15 @@ std::set<std::string> EuclideanSpaceLSH::retrieveNeighbors(NDVector p){
     std::set<std::string> neighborIds;
     std::vector<std::string> perTableIds;
 
-    int hashKey;
-    int g_key;
+    unsigned hashKey;
+    std::string g_key;
+    //int g_key = 100;
 
 
     for (int i=0; i<this->L; i++){
         hashKey = this->phi(p, i);
-        g_key   = this->g(p, i);
+        g_key = g(p,i);
+
 
         perTableIds = this->hashTables[i].getVectorIds(hashKey, g_key);
 
@@ -157,25 +171,37 @@ std::set<std::string> EuclideanSpaceLSH::retrieveNeighbors(NDVector p){
 }
 
 
-int EuclideanSpaceLSH::g(NDVector p, int j){
+std::string EuclideanSpaceLSH::g(NDVector p, int j){
 
-    std::vector<hFunction> &h = this->H[j];
+    /*std::vector<hFunction *> &h = this->H[j];
 
     std::string s = "";
-    for (auto h_i : h){
-        int val = h_i(p);
+    for (auto &h_i : h){
+        int val = h_i->operator()(p);
          s += (val > 0) ? std::to_string( val ) : std::to_string( -val );
     }
 
     std::stringstream ss(s);
     int value;
     ss >> value;
-    return value;
+    return value;*/
+
+    std::vector<hFunction*> &h = this->H[j];
+
+    std::stringstream ss("{");
+
+    for (auto &h_i : h){
+        ss << h_i->operator()(p) << ",";
+    }
+    ss << "\b}";
+
+    std::string key_str = ss.str();
+    return key_str;
 }
 
 
 
-int EuclideanSpaceLSH::phi(NDVector p, int j) {
+unsigned EuclideanSpaceLSH::phi(NDVector p, int j) {
 
 /*    std::vector<hFunction> &h = this->H[j];
     std::vector<int> &r = this->R[j];
@@ -198,19 +224,16 @@ int EuclideanSpaceLSH::phi(NDVector p, int j) {
     return result;
 */
 
-    std::vector<hFunction> &h = this->H[j];
 
-    std::stringstream ss("");
-
-    for (auto h_i : h){
-        ss << "," << h_i(p);
-    }
-
-    std::string key_str = ss.str();
+    std::string key_str = g(p,j);
 
     std::hash<std::string> hash_str;
 
-    int key = (int) hash_str(key_str); //TODO: check if uint can be casted in int. Check keys types in general
+#ifdef DEVELOPMENT
+    if (j == 0) if (ids1.find(key_str) != ids1.end()) std::cout << "Key" << key_str << "already in table 0" << std::endl;
+#endif
+
+    unsigned key = (unsigned) hash_str(key_str); //TODO: check if uint can be casted in int. Check keys types in general
     return key % tableSize;
 
 }

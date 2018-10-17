@@ -10,16 +10,14 @@
 #include "HashTable.h"
 
 
-namespace cosine{
-    class hFunction {
-    public:
-        explicit hFunction (int d);
-        int operator () (NDVector p);
-    private:
-        NDVector r;
-    };
+class hCos : public hFunction {
+public:
+    explicit hCos (int d);
+    int operator () (NDVector &p) override;
+private:
+    NDVector r;
+};
 
-}
 
 class CosineSimilarityLSH :public LSH{
 
@@ -29,20 +27,11 @@ public:
     void                  insertVector     (NDVector p, std::string vectorId);
     void                  insertDataset    (std::unordered_map<std::string, NDVector> X);
     std::set<std::string> retrieveNeighbors(NDVector p);
+    virtual               ~CosineSimilarityLSH(){for (auto &h_family : H) for (auto &h_i : h_family) delete h_i;} //TODO: FIX THIS
 
 
 private:
-
-    //int tableSize;
-    int L;
-    int k;
-
-    std::vector<std::vector<cosine::hFunction>> H;
-    std::vector<HashTable> hashTables;
-
-
-    int g  (NDVector p, int i);
-
+    int g(NDVector p, int i);
 };
 
 

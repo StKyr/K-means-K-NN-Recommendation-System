@@ -31,6 +31,22 @@ add_executable(lsh src/LSH.cpp include/NDVector.h
         src/EuclideanHypercubeProjection.cpp)
 target_link_libraries(lsh /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
+add_executable(euclidean src/LSH.cpp include/NDVector.h
+        src/NDVector.cpp
+        src/VectorTSVReader.cpp
+        include/VectorTSVReader.h
+        include/metrics.h
+        src/metrics.cpp
+        src/NearestNeighborSearch.cpp
+        include/NearestNeighborSearch.h
+        include/EuclideanSpaceLSH.h
+        src/EuclideanSpaceLSH.cpp
+        src/HashTable.cpp
+        include/HashTable.h
+        include/LSH.h
+        src/EuclideanHypercubeProjection.cpp)
+target_link_libraries(euclidean /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
+
 add_executable(hypercube src/LSH.cpp include/NDVector.h
         src/NDVector.cpp
         src/VectorTSVReader.cpp

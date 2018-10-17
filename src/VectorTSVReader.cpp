@@ -27,7 +27,7 @@ std::pair<std::string, std::vector<double>> VectorTSVReader::parseNextLine(){
 
                 vectorId = part;
 
-                while (getline(ss, part, '\t')) {
+                while (getline(ss, part, ' ')) {
                     std::stringstream xstream(part);
                     xstream >> x;
                     v.push_back(x);

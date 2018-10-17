@@ -7,7 +7,7 @@
 #include <list>
 
 typedef struct bucket_t{
-    int         g_key;
+    std::string g_key;
     std::string VectorId;
 } Bucket;
 
@@ -25,7 +25,7 @@ typedef std::list<Bucket> BucketList;
 class HashTable {
 public:
     explicit   HashTable      (int size);
-    std::vector<std::string>   getVectorIds(int position, int originalKey);
+    std::vector<std::string>   getVectorIds(int position, std::string key);
     void       insert         (int position, Bucket bucket);
     ~HashTable      ()     = default;          //                             {for (BucketList *pList : this->array) delete pList;}
 

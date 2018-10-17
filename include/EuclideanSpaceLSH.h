@@ -19,13 +19,12 @@
 #endif
 
 
-namespace euclidean{
 
 
-    class hFunction {
+class hEucl : public hFunction {
     public:
-        explicit hFunction (int w, int d);
-        int operator () (NDVector p);
+        explicit hEucl (int w, int d);
+        int operator () (NDVector &p) override;
     private:
         int w;
         int t;
@@ -40,37 +39,33 @@ namespace euclidean{
         FRIEND_TEST(testhFunction, return_value_constraints);
 
 #endif
-    };
+};
 
-
-
-}
 
 
 class EuclideanSpaceLSH : public LSH{
 public:
-                          EuclideanSpaceLSH(int L, int tableSize, int M, int k, int d, int w);
+                          EuclideanSpaceLSH(int L, int tableSize, int k, int d, int w);
     void                  insertVector     (NDVector p, std::string vectorId);
     void                  insertDataset    (std::unordered_map<std::string, NDVector> X);
     std::set<std::string> retrieveNeighbors(NDVector p);
+    virtual               ~EuclideanSpaceLSH(){for (auto &h_family : H) for (auto &h_i : h_family) delete (hEucl *)h_i;}
 
 
 private:
+    static const int M = 0;
 
-    int L;
-    int tableSize;
-    int M;
+    std::vector<std::vector<int>> R; //TODO: remove that -> change to single
 
-    std::vector<std::vector<euclidean::hFunction>> H;
-    std::vector<std::vector<int>>       R; //TODO: remove that -> change to single
-    std::vector<HashTable>              hashTables;
+    std::string g(NDVector p, int i);
+    unsigned phi(NDVector p, int j);
 
-
-    int g  (NDVector p, int j);
-    int phi(NDVector p, int j);
 
 
 #ifdef DEVELOPMENT
+
+    std::set<std::string> ids1;
+
     FRIEND_TEST(testEuclideanLSH, g_values_digits);
     FRIEND_TEST(testEuclideanLSH, g_values_exact);
     FRIEND_TEST(testEuclideanLSH, g_values_nearby);
