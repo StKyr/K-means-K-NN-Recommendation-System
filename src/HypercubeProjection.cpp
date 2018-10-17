@@ -39,10 +39,12 @@ private:
 
 hammingNumber HypercubeProjection::projectPoint(NDVector p){
 
-    std::string number = "";
+    std::stringstream ss("");
     for (auto h: H){
-        number += this->f(h(p));
+        ss << f((*h)(p));
     }
+
+    hammingNumber number = ss.str();
     return number;
 }
 
@@ -50,6 +52,8 @@ void HypercubeProjection::insertVector(NDVector p, std::string vectorId){
     hammingNumber number = this->projectPoint(p);
     this->hashTable[number].push_back(vectorId); //TODO: possible seg here
 }
+
+
 void HypercubeProjection::insertDataset(std::unordered_map<std::string, NDVector> X){
     for (auto item : X){
         this->insertVector(item.second, item.first);
@@ -57,20 +61,62 @@ void HypercubeProjection::insertDataset(std::unordered_map<std::string, NDVector
 }
 
 
-std::vector<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
+std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
+
     hammingNumber hash = this->projectPoint(p);
     std::vector<std::string> neighborIds = this->hashTable[hash];
-
 
     HammingNeighborGenerator generator(hash, this->probes);
 
     while (generator.hashNext()){
+
         hammingNumber nearbyHash = generator.next();
         std::vector<std::string> &nearbyIds = hashTable[hash];
+
         for (auto id : nearbyIds) { //TODO: change to iterator
             neighborIds.push_back(id);
         }
     }
-    return neighborIds;
+
+    std::set<std::string> setIds(neighborIds.begin(), neighborIds.end());
+    return setIds;
 }
+
+
+EuclideanHypercubeProjection::EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d)
+    :HypercubeProjection(d_, M, probes, N){
+
+    for (int i=0; i<d_; i++) H.emplace_back(new hEucl(w,d));
+    srand(time(NULL));
+}
+
+EuclideanHypercubeProjection::~EuclideanHypercubeProjection(){
+    for (int i=0; i<d_; i++){
+        delete (hEucl *)H[i];
+    }
+}
+
+
+int EuclideanHypercubeProjection::f(int h_p){
+
+    if (h_to_f_index.find(h_p) == h_to_f_index.end()){
+
+        h_to_f_index[h_p] = rand() % 2;
+    }
+
+    return h_to_f_index[h_p];
+}
+
+
+CosineHypercubeProjection::CosineHypercubeProjection(int d_, int M, int probes, int N, int d)
+    :HypercubeProjection(d_, M, probes, N){
+
+    for (int i=0; i<d_; i++) H.emplace_back(new hCos(d));
+}
+
+
+CosineHypercubeProjection::~CosineHypercubeProjection(){
+    for (int i=0; i<d_; i++) delete (hCos *)H[i];
+}
+
 

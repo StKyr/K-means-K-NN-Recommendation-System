@@ -6,15 +6,16 @@
 #include <set>
 #include "NDVector.h"
 #include "HashTable.h"
+#include "AbstractSimilaritySearch.h"
 
 class hFunction;
 
-class LSH{
+class LSH : public AbstractSimilaritySearch{
 public:
     virtual void                  insertVector     (NDVector p, std::string vectorId)            = 0;
     virtual void                  insertDataset    (std::unordered_map<std::string, NDVector> X) = 0;
     virtual std::set<std::string> retrieveNeighbors(NDVector p)                                  = 0;
-    virtual                            ~LSH() = default;
+    virtual                      ~LSH() = default;
 
 protected:
     int L;

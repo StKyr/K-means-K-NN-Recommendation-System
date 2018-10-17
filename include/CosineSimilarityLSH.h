@@ -6,7 +6,7 @@
 #include <NDVector.h>
 #include <unordered_map>
 #include <set>
-#include <LSH.h>
+#include <similaritySearch.h>
 #include "HashTable.h"
 
 

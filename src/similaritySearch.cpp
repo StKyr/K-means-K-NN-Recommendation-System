@@ -6,15 +6,18 @@
 #include <metrics.h>
 #include <VectorTSVReader.h>
 #include <chrono>
+#include <HypercubeProjection.h>
 
 
-void parse_command_line_arguments(int argc, char *argv[]);
-std::unordered_map<std::string, NDVector> read_dataset(VectorTSVReader &reader);
+void parse_lsh_arguments(int argc, char *argv[]);
+void parse_rph_arguments(int argc, char *argv[]);
+void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R,
+                        supported_metrics metric, std::string name);
 
 
 namespace HyperParams {
     int M = 4;  //TODO: check value
-    int w = 4;
+    int w = 800;
 }
 
 
@@ -24,28 +27,80 @@ namespace Params {
     int k = 3;
     int L = 1;
     std::string output_file;
+    int M;
+    int probes;
 }
 
+
+#define RUN_LSH
+//#define RUN_RPH
+
 int main(int argc, char *argv[]) {
-    parse_command_line_arguments(argc, argv);
 
+#ifdef RUN_LSH
+    parse_lsh_arguments(argc, argv);
+#endif
+
+#ifdef RUN_RPH
+    parse_rph_arguments(argc, argv);
+#endif
+
+
+    Dataset X;
+    Dataset Y;
+    supported_metrics metric;
+    double R;
+
+    auto & output = std::cout;
+
+    DatasetReader dr(Params::input_file);
+    X = dr.readDataset();
+    metric = dr.metric;
+
+    QuerysetReader qr(Params::query_file);
+    Y = qr.readDataset();
+    R = qr.R;
+
+    if (dr.vectorDim != qr.vectorDim) throw std::runtime_error("Input datasets have different dimensions.");
+
+
+
+#ifdef RUN_LSH
+    AbstractSimilaritySearch *LSH = new EuclideanSpaceLSH(Params::L, (int)X.size()/2, Params::k, dr.vectorDim, HyperParams::w);
+    similaritySearch(LSH, X, Y, R, metric, "LSH");
+    delete (EuclideanSpaceLSH *)LSH;
+#endif
+
+
+#ifdef RUN_RPH
+    if (metric == Euclidean) {
+        AbstractSimilaritySearch *RPH = new EuclideanHypercubeProjection(Params::k, Params::M, Params::probes, X.size(), HyperParams::w, dr.vectorDim);
+        similaritySearch(RPH, X, Y, R, metric, "RPH");
+        delete (EuclideanHypercubeProjection *) RPH;
+    }else if (metric == Cosine) {
+        AbstractSimilaritySearch *RPH = new CosineHypercubeProjection(Params::k, Params::M, Params::probes, X.size(), dr.vectorDim);
+        similaritySearch(RPH, X, Y, R, metric, "RPH");
+        delete (CosineHypercubeProjection *) RPH;
+    }
+#endif
+
+    return 0;
+
+}
+
+
+
+void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R, supported_metrics metric, std::string name){
     //TODO: READERS SHOULD WORK WITH \t
+    auto &output = std::cout;
 
-    Dataset                                   X;
-    Dataset                                   Y;
-    supported_metrics                         metric = _NULL;
-    double                                    R;
-    int                                       d;
     NDVector                                  q;
     int                                       N;
-    auto                                    & output = std::cout;
-
     std::set<std::string>                     possibleNeighborIds;
     std::vector<std::string>                  neighborIds;
     std::unordered_map<std::string, NDVector> possibleNeighbors;
     std::pair<std::string, double>            lshNN;
     std::pair<std::string, double>            trueNN;
-
     double                                    maxApproxRatio   = 0;
     double                                    currApproxRatio;
     double                                    currApproxTime;
@@ -57,64 +112,32 @@ int main(int argc, char *argv[]) {
 
     double (*distance)(NDVector, NDVector);
 
-
-    DatasetReader dr(Params::input_file);
-    X = dr.readDataset();
-    metric = dr.metric;
-    d = dr.vectorDim;
-
-    QuerysetReader qr(Params::query_file);
-    Y = qr.readDataset();
-    R = qr.R;
-
-    if (dr.vectorDim != qr.vectorDim) throw std::runtime_error("Input datasets have different dimensions.");
-
     N = (int)X.size();
 
     if (metric == Euclidean) distance = metrics::euclidean_distance;
     else                     distance = metrics::cosine_distance;
 
-    HyperParams::w = 400;
-    Params::k = 4;
-    Params::L = 5;
-    R = 100;
 
-
-    EuclideanSpaceLSH lsh (Params::L, N/2, Params::k, d, HyperParams::w);
-    lsh.insertDataset(X);
-
-
-
-    //extern std::set<std::string> allKeys;
-
-
-
+    searchStructure->insertDataset(X);
 
     int i=0;
 
     for (auto item : Y){
- if (i++ == 5) break;
+        if (i++ == 5) break;
 
         begin = std::chrono::steady_clock::now();
 
-
         NDVector q = item.second;
 
-        possibleNeighborIds = lsh.retrieveNeighbors(q);
+        possibleNeighborIds = searchStructure->retrieveNeighbors(q);
+
         possibleNeighbors.clear();
-
-        for (auto id : possibleNeighborIds){
-            possibleNeighbors[id] =  X[id] ;
-        }
-
-
+        for (auto id : possibleNeighborIds) possibleNeighbors[id] =  X[id] ;
 
         lshNN            = nearestNeighbor(q, possibleNeighbors, distance);
 
         end              = std::chrono::steady_clock::now();
         currApproxTime   = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
-
-
 
         begin            = std::chrono::steady_clock::now();
 
@@ -123,9 +146,7 @@ int main(int argc, char *argv[]) {
         end              = std::chrono::steady_clock::now();
         currDistanceTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
-
         neighborIds      = range_nearestNeighbors(q, R, possibleNeighbors, distance);
-
 
 
         if (trueNN.second != 0 && !isnan(maxApproxRatio)){
@@ -137,15 +158,14 @@ int main(int argc, char *argv[]) {
             maxApproxRatio = nan("");
         }
 
-
         output << "Query: " << item.first << std::endl;
         output << "=== " << possibleNeighborIds.size() << " vectors with same key ===" << std::endl;
         output << "R-near neighbors:" << std::endl;
         for (auto &id: neighborIds) output << id << std::endl;
         output << "Nearest neighbor: " << lshNN.first << std::endl;
-        output << "distanceLSH: " << lshNN.second <<std::endl;
+        output << "distance"+name+": " << lshNN.second <<std::endl;
         output << "distanceTrue: " << trueNN.second <<std::endl;
-        output << "tLSH: " << currApproxTime << " (ms)" <<std::endl;
+        output << "t"+name+": " << currApproxTime << " (ms)" <<std::endl;
         output << "tTrue: " << currDistanceTime << " (ms)" <<std::endl;
 
         std::cout << "-------------------------\n" <<std::endl;
@@ -154,18 +174,17 @@ int main(int argc, char *argv[]) {
         sumDistanceTime += currDistanceTime;
     }
 
-
-
     output << "----------------------------------------------" << std::endl;
     output << "Maximum approximation ratio: " << maxApproxRatio << std::endl;
     output << "Mean approximate-NN time: " << (sumApproxTime / N) << " (ms)" << std::endl;
     output << "Mean actual NN time: " << (sumDistanceTime / N) << " (ms)" << std::endl;
-
-    return 0;
 }
 
-void parse_command_line_arguments(int argc, char *argv[]){
 
+
+
+
+void parse_lsh_arguments(int argc, char *argv[]){
     using namespace boost::program_options;
     options_description desc("Allowed options");
     desc.add_options()
@@ -178,27 +197,50 @@ void parse_command_line_arguments(int argc, char *argv[]){
         //("M", value<int>(),                           "set maximum number of points for inspection")
         //("probes", value<int>(),                      "set maximum number of Hypercube points for inspection")
             ;
-
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
     notify(vm);
-
     if (vm.count("help")) {
         std::cout << desc << "\n";
         exit(0);
     }
-
-
     if (vm.count("-d")) Params::input_file = vm["-d"].as<std::string>();
     else {std::cout<< "Parameter -d is mandatory" << std::endl; exit(1);}
-
     if (vm.count("-q")) Params::query_file = vm["-q"].as<std::string>();
     else {std::cout<< "Parameter -q is mandatory" << std::endl; exit(1);}
-
     if (vm.count("-o")) Params::output_file = vm["-o"].as<std::string>();
     else {std::cout<< "Parameter -o is mandatory" << std::endl; exit(1);}
-
     Params::k = vm["-k"].as<int>(); if (Params::k <= 0) {std::cout<< "Invalid value of parameter -k" << std::endl; exit(1);}
     Params::L = vm["-L"].as<int>(); if (Params::L <= 0) {std::cout<< "Invalid value of parameter -L" << std::endl; exit(1);}
 }
 
+
+void parse_rph_arguments(int argc, char *argv[]){
+    using namespace boost::program_options;
+    options_description desc("Allowed options");
+    desc.add_options()
+            ("help",   "produce help message")
+            ("-d",     value<std::string>(),                   "set input file")
+            ("-q",     value<std::string>(),                   "set query file")
+            ("-o",     value<std::string>(),                   "set output file")
+            ("-k",     value<int>()->default_value(3),         "set number of bits in hypercube representation")
+            ("-M",      value<int>()->default_value(10),       "set maximum number of points for inspection")
+            ("-probes", value<int>()->default_value(10),       "set maximum number of hypercube vertices for inspection")
+            ;
+    variables_map vm;
+    store(parse_command_line(argc, argv, desc), vm);
+    notify(vm);
+    if (vm.count("help")) {
+        std::cout << desc << "\n";
+        exit(0);
+    }
+    if (vm.count("-d")) Params::input_file = vm["-d"].as<std::string>();
+    else {std::cout<< "Parameter -d is mandatory" << std::endl; exit(1);}
+    if (vm.count("-q")) Params::query_file = vm["-q"].as<std::string>();
+    else {std::cout<< "Parameter -q is mandatory" << std::endl; exit(1);}
+    if (vm.count("-o")) Params::output_file = vm["-o"].as<std::string>();
+    else {std::cout<< "Parameter -o is mandatory" << std::endl; exit(1);}
+    Params::k = vm["-k"].as<int>(); if (Params::k <= 0) {std::cout<< "Invalid value of parameter -k" << std::endl; exit(1);}
+    Params::L = vm["-M"].as<int>(); if (Params::L <= 0) {std::cout<< "Invalid value of parameter -M" << std::endl; exit(1);}
+    Params::probes = vm["-probes"].as<int>(); if (Params::probes <= 0) {std::cout<< "Invalid value of parameter -probes" << std::endl; exit(1);}
+}

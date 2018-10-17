@@ -13,7 +13,7 @@ endif()]]
 
 include_directories(include src test /home/kyriakos/Apps/tools/boost_1_68_0)
 
-add_executable(lsh src/LSH.cpp include/NDVector.h
+add_executable(lsh src/similaritySearch.cpp include/NDVector.h
         src/NDVector.cpp
         src/VectorTSVReader.cpp
         include/VectorTSVReader.h
@@ -27,11 +27,11 @@ add_executable(lsh src/LSH.cpp include/NDVector.h
         include/CosineSimilarityLSH.h
         src/HashTable.cpp
         include/HashTable.h
-        include/LSH.h
-        src/EuclideanHypercubeProjection.cpp)
+        include/similaritySearch.h
+        include/AbstractSimilaritySearch.h)
 target_link_libraries(lsh /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
-add_executable(euclidean src/LSH.cpp include/NDVector.h
+add_executable(euclidean src/similaritySearch.cpp include/NDVector.h
         src/NDVector.cpp
         src/VectorTSVReader.cpp
         include/VectorTSVReader.h
@@ -43,11 +43,11 @@ add_executable(euclidean src/LSH.cpp include/NDVector.h
         src/EuclideanSpaceLSH.cpp
         src/HashTable.cpp
         include/HashTable.h
-        include/LSH.h
-        src/EuclideanHypercubeProjection.cpp)
+        include/similaritySearch.h
+        include/AbstractSimilaritySearch.h)
 target_link_libraries(euclidean /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
-add_executable(hypercube src/LSH.cpp include/NDVector.h
+add_executable(hypercube src/similaritySearch.cpp include/NDVector.h
         src/NDVector.cpp
         src/VectorTSVReader.cpp
         include/VectorTSVReader.h
@@ -61,11 +61,9 @@ add_executable(hypercube src/LSH.cpp include/NDVector.h
         include/CosineSimilarityLSH.h
         src/HashTable.cpp
         include/HashTable.h
-        include/LSH.h
-        src/EuclideanHypercubeProjection.cpp
-        include/EuclideanHypercubeProjection.h
+        include/similaritySearch.h
         include/HypercubeProjection.h
-        src/HypercubeProjection.cpp)
+        src/HypercubeProjection.cpp include/AbstractSimilaritySearch.h)
 target_link_libraries(hypercube /home/kyriakos/Apps/tools/boost_1_68_0/stage/lib/libboost_program_options.so)
 
 

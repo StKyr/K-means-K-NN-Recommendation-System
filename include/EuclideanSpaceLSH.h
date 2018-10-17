@@ -12,7 +12,7 @@
 
 #include "NDVector.h"
 #include "HashTable.h"
-#include "LSH.h"
+#include "similaritySearch.h"
 
 #ifdef DEVELOPMENT
 #include <gtest/gtest.h>

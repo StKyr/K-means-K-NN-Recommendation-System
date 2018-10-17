@@ -7,55 +7,59 @@
 #include "NDVector.h"
 #include "EuclideanSpaceLSH.h"
 #include "CosineSimilarityLSH.h"
+#include "AbstractSimilaritySearch.h"
 
 typedef std::string hammingNumber;
 
-class HypercubeProjection{
+class HypercubeProjection : public AbstractSimilaritySearch{
 public:
-                             HypercubeProjection(int d_, int M, int probes, int N)           : d_(d_), M(M), probes(probes) {}
-    void                     insertVector       (NDVector p, std::string vectorId)           ;
-    void                     insertDataset      (std::unordered_map<std::string, NDVector> X);
-    std::vector<std::string> retrieveNeighbors  (NDVector p)                                 ;
+                          HypercubeProjection(int d_, int M, int probes, int N)           : d_(d_), M(M), probes(probes) {}
+    void                  insertVector       (NDVector p, std::string vectorId)            override;
+    void                  insertDataset      (std::unordered_map<std::string, NDVector> X) override;
+    std::set<std::string> retrieveNeighbors  (NDVector p)                                  override;
+    virtual              ~HypercubeProjection()                                            = 0;
 
 
 
 protected:
-
-    std::vector<int (*) (NDVector p)> H;
-    int (* f) (int h_p);
+    int d_;
+    std::vector<hFunction *> H;
+    virtual int f(int h_p) =0;
 
 private:
-    int d_;
+
     int M;
     int probes;
-    std::unordered_map<hammingNumber , std::vector<std::string>> hashTable;
-
+    std::unordered_map<hammingNumber, std::vector<std::string>> hashTable;
 
     hammingNumber projectPoint(NDVector p);
 };
 
-class EuclideanHypercubeProjection : HypercubeProjection {
+
+
+
+class EuclideanHypercubeProjection : public HypercubeProjection {
 public:
 
-    EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d)  :HypercubeProjection(d_, M, probes, N){
-        for (int i=0; i<d_; i++) H.emplace_back(euclidean::hFunction(w,d));
-        this->f = euclideanF;
-    }
+    EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d) ;
+    ~EuclideanHypercubeProjection() override;
 
 private:
-    static int euclideanF(int h_p){return (h_p > 0)? 1 : 0;}
+    std::unordered_map<int, int> h_to_f_index;
+    int f(int h_p) override;
 };
 
-class CosineHyperspaceProjection : HypercubeProjection {
+
+
+
+class CosineHypercubeProjection : public HypercubeProjection {
 public:
 
-    CosineHyperspaceProjection(int d_, int M, int probes, int N, int d)  :HypercubeProjection(d_, M, probes, N){
-        for (int i=0; i<d_; i++) H.emplace_back(cosine::hFunction(d));
-        this->f = cosineF;
-    }
+    CosineHypercubeProjection(int d_, int M, int probes, int N, int d);
+    ~CosineHypercubeProjection() override;
 
 private:
-    static int cosineF(int h_p){return h_p;}
+    int f(int h_p) override {return h_p;}
 };
 
 

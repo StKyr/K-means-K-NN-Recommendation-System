@@ -191,7 +191,7 @@ std::string EuclideanSpaceLSH::g(NDVector p, int j){
     std::stringstream ss("{");
 
     for (auto &h_i : h){
-        ss << h_i->operator()(p) << ",";
+        ss << (*h_i)(p) << ",";
     }
     ss << "\b}";
 
