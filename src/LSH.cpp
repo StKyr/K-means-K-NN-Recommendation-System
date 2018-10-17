@@ -93,7 +93,8 @@ int main(int argc, char *argv[]) {
     int i=0;
 
     for (auto item : Y){
- //if (i++ == 10) break;
+ if (i++ == 5) break;
+
         begin = std::chrono::steady_clock::now();
 
 
@@ -117,13 +118,13 @@ int main(int argc, char *argv[]) {
 
         begin            = std::chrono::steady_clock::now();
 
-        trueNN           = nearestNeighbor(q, X, metrics::euclidean_distance);
+        trueNN           = nearestNeighbor(q, X, distance);
 
         end              = std::chrono::steady_clock::now();
         currDistanceTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 
 
-        neighborIds      = range_nearestNeighbors(q, R, possibleNeighbors, metrics::euclidean_distance);
+        neighborIds      = range_nearestNeighbors(q, R, possibleNeighbors, distance);
 
 
 
