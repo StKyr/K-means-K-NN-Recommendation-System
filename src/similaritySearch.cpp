@@ -32,8 +32,8 @@ namespace Params {
 }
 
 
-#define RUN_LSH
-//#define RUN_RPH
+//#define RUN_LSH
+#define RUN_RPH
 
 int main(int argc, char *argv[]) {
 
@@ -110,6 +110,8 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
     std::chrono::steady_clock::time_point     begin;
     std::chrono::steady_clock::time_point     end;
 
+    double                                    sumApproxRatio = 0;
+
     double (*distance)(NDVector, NDVector);
 
     N = (int)X.size();
@@ -123,7 +125,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
     int i=0;
 
     for (auto item : Y){
-        if (i++ == 5) break;
+//        if (i++ == 5) break;
 
         begin = std::chrono::steady_clock::now();
 
@@ -158,7 +160,9 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
             maxApproxRatio = nan("");
         }
 
-        output << "Query: " << item.first << std::endl;
+        //sumApproxRatio += currApproxRatio;
+
+/*        output << "Query: " << item.first << std::endl;
         output << "=== " << possibleNeighborIds.size() << " vectors with same key ===" << std::endl;
         output << "R-near neighbors:" << std::endl;
         for (auto &id: neighborIds) output << id << std::endl;
@@ -168,7 +172,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
         output << "t"+name+": " << currApproxTime << " (ms)" <<std::endl;
         output << "tTrue: " << currDistanceTime << " (ms)" <<std::endl;
 
-        std::cout << "-------------------------\n" <<std::endl;
+        std::cout << "-------------------------\n" <<std::endl;*/
 
         sumApproxTime += currApproxTime;
         sumDistanceTime += currDistanceTime;
@@ -176,6 +180,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
     output << "----------------------------------------------" << std::endl;
     output << "Maximum approximation ratio: " << maxApproxRatio << std::endl;
+    //output << "Mean approximation ratio: " << (sumApproxRatio / N) << std::endl;
     output << "Mean approximate-NN time: " << (sumApproxTime / N) << " (ms)" << std::endl;
     output << "Mean actual NN time: " << (sumDistanceTime / N) << " (ms)" << std::endl;
 }
@@ -194,8 +199,6 @@ void parse_lsh_arguments(int argc, char *argv[]){
             ("-o", value<std::string>(),                   "set output file")
             ("-k", value<int>()->default_value(4),         "set number of LSH hashes")
             ("-L", value<int>()->default_value(5),         "set number of LSH hash tables")
-        //("M", value<int>(),                           "set maximum number of points for inspection")
-        //("probes", value<int>(),                      "set maximum number of Hypercube points for inspection")
             ;
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -241,6 +244,6 @@ void parse_rph_arguments(int argc, char *argv[]){
     if (vm.count("-o")) Params::output_file = vm["-o"].as<std::string>();
     else {std::cout<< "Parameter -o is mandatory" << std::endl; exit(1);}
     Params::k = vm["-k"].as<int>(); if (Params::k <= 0) {std::cout<< "Invalid value of parameter -k" << std::endl; exit(1);}
-    Params::L = vm["-M"].as<int>(); if (Params::L <= 0) {std::cout<< "Invalid value of parameter -M" << std::endl; exit(1);}
+    Params::M = vm["-M"].as<int>(); if (Params::M <= 0) {std::cout<< "Invalid value of parameter -M" << std::endl; exit(1);}
     Params::probes = vm["-probes"].as<int>(); if (Params::probes <= 0) {std::cout<< "Invalid value of parameter -probes" << std::endl; exit(1);}
 }

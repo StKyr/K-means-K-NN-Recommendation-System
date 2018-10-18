@@ -17,7 +17,7 @@ public:
     void                  insertVector       (NDVector p, std::string vectorId)            override;
     void                  insertDataset      (std::unordered_map<std::string, NDVector> X) override;
     std::set<std::string> retrieveNeighbors  (NDVector p)                                  override;
-    virtual              ~HypercubeProjection()                                            = 0;
+    virtual              ~HypercubeProjection()                                            {}
 
 
 

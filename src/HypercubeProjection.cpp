@@ -1,4 +1,7 @@
+#include <iostream>
 #include "HypercubeProjection.h"
+
+bool warningDisplayed = false;
 
 class HammingNeighborGenerator{
 public:
@@ -7,9 +10,40 @@ public:
         : maxDistance(maxDistance), neighborsRetrieved(0){
 
         int len = number.size();
-        this->sortedNeighbors.reserve((unsigned long)pow(2,len));
-        this->findHammingNeighbors(number, len-1, maxDistance);
+
+
+        if (0){//(maxDistance == 1){
+
+            this->sortedNeighbors.reserve(len);
+
+            for (int i=0; i<len; i++){
+                std::string s = number;
+                s[i] = (s[i] == '0') ? '1' : '0';
+                sortedNeighbors.push_back(s);
+            }
+
+        }else {
+
+
+            try {
+                this->sortedNeighbors.reserve(len * maxDistance);
+            } catch (std::bad_alloc &e) {
+                if (!warningDisplayed) {
+                    std::cerr << "Warning: Hypercube consists of " << len * maxDistance
+                              << " vertices. Unable to produce all hamming vertices."
+                              << "Search will be limited to hamming vertices with maximum distance of 10."
+                              << std::endl;
+                    warningDisplayed = true;
+                }
+                this->maxDistance = 10;
+                this->sortedNeighbors.reserve(len * maxDistance);
+            }
+            this->findHammingNeighbors(number, len - 1, maxDistance);
+        }
     }
+
+
+
 
     bool hashNext()      {return neighborsRetrieved < sortedNeighbors.size();}
     hammingNumber next() {return sortedNeighbors[neighborsRetrieved++];}
@@ -63,23 +97,34 @@ void HypercubeProjection::insertDataset(std::unordered_map<std::string, NDVector
 
 std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
 
+    int neighborsInserted = 0;
+    int probesChecked = 1;
     hammingNumber hash = this->projectPoint(p);
-    std::vector<std::string> neighborIds = this->hashTable[hash];
 
-    HammingNeighborGenerator generator(hash, this->probes);
 
+    std::set<std::string> neighborIds;
+
+    for (auto &id : this->hashTable[hash]){
+        if (neighborsInserted++ >= this->M) return neighborIds;
+
+        neighborIds.insert(id);
+    }
+
+    HammingNeighborGenerator generator(hash, 1); //todo: change to something else
     while (generator.hashNext()){
+        if (probesChecked++ >= this->probes) return neighborIds;
 
         hammingNumber nearbyHash = generator.next();
-        std::vector<std::string> &nearbyIds = hashTable[hash];
 
-        for (auto id : nearbyIds) { //TODO: change to iterator
-            neighborIds.push_back(id);
+        for (auto &id : hashTable[hash]) {
+
+            neighborIds.insert(id);
+
+            if (neighborsInserted++ >= this->M) return  neighborIds;
         }
     }
 
-    std::set<std::string> setIds(neighborIds.begin(), neighborIds.end());
-    return setIds;
+    return neighborIds;
 }
 
 
