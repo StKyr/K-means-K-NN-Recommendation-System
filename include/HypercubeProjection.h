@@ -11,13 +11,36 @@
 
 typedef std::string hammingNumber;
 
+
+/**
+ * Base class for Random Hypercube Projection methods
+ */
 class HypercubeProjection : public AbstractSimilaritySearch{
 public:
-                          HypercubeProjection(int d_, int M, int probes, int N)           : d_(d_), M(M), probes(probes) {}
-    void                  insertVector       (NDVector p, std::string vectorId)            override;
-    void                  insertDataset      (std::unordered_map<std::string, NDVector> X) override;
-    std::set<std::string> retrieveNeighbors  (NDVector p)                                  override;
-    virtual              ~HypercubeProjection()                                            {}
+
+    HypercubeProjection(int d_, int M, int probes, int N) : d_(d_), M(M), probes(probes) {}
+
+    /**
+     * Insert the ID of a single vector in inner structures
+     * @param p The vector whose ID will be stored
+     * @param vectorId The ID to be stored
+     */
+    void insertVector(NDVector &p, std::string vectorId) override;
+
+    /**
+     * Insert (the IDs of) all vectors of a dataset in inner structures
+     * @param X A dataset with IDs of the vectors as keys
+     */
+    void insertDataset(std::unordered_map<std::string, NDVector> &X) override;
+
+    /**
+     * Search inner structures and retrieve all vector IDs that are possible neighbors candidates of a given vector.
+     * @param p The vector to be searched for possible neighbors
+     * @return A set of IDs of neighbor candidates from the dataset inserted
+     */
+    std::set<std::string> retrieveNeighbors(NDVector &p) override;
+
+    virtual ~HypercubeProjection() {}
 
 
 
@@ -32,7 +55,12 @@ private:
     int probes;
     std::unordered_map<hammingNumber, std::vector<std::string>> hashTable;
 
-    hammingNumber projectPoint(NDVector p);
+    /**
+     * Find the hamming number that is the hash key of a datapoint p
+     * @param p The datapoint to be hashed
+     * @return A hamming number representing the hypercube vertex
+     */
+    hammingNumber projectPoint(NDVector &p);
 };
 
 

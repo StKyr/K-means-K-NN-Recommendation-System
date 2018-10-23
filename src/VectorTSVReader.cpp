@@ -42,13 +42,14 @@ std::pair<std::string, std::vector<double>> VectorTSVReader::parseNextLine(){
     return std::make_pair(vectorId, v);
 }
 
-Dataset VectorTSVReader::readDataset() {
+Dataset* VectorTSVReader::readDataset() {
 
     this->inputFile.open(this->filename, std::ios::in);
 
     parseFirstLine();
 
-    Dataset dataset;
+    Dataset* dataset = new std::unordered_map<std::string, NDVector>();
+
     std::pair<std::string, std::vector<double>> nextVector;
 
     nextVector = parseNextLine();
@@ -62,7 +63,7 @@ Dataset VectorTSVReader::readDataset() {
 
         if (v.dim() != this->vectorDim) throw std::runtime_error("\""+filename+"\" dataset contains vector of varying dimensions.");
 
-        dataset[nextVector.first] = v;
+        (*dataset)[nextVector.first] = v;
 
         nextVector = parseNextLine();
     }
@@ -118,10 +119,6 @@ void QuerysetReader::parseFirstLine(){
     std::string part;
 
     if (this->inputFile.is_open()) {
-
-/*        if (!getline(this->inputFile, part)) {                                      // get first line of file
-            throw std::runtime_error("File \""+this->filename+"\" is empty");
-        }*/
 
         try {
 

@@ -15,7 +15,7 @@ class VectorTSVReader {
 public:
 
     explicit VectorTSVReader (std::string& flename) :filename(flename), vectorDim(0) {}
-    Dataset  readDataset     ();
+    Dataset* readDataset     ();
              ~VectorTSVReader()                    {if (this->inputFile.is_open()) this->inputFile.close();}
 
     int vectorDim;

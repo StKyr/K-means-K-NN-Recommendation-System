@@ -60,7 +60,7 @@ int CosineSimilarityLSH::g(NDVector p, int i){
     return g_val;
 }
 
-void CosineSimilarityLSH::insertVector(NDVector p, std::string vectorId) {
+void CosineSimilarityLSH::insertVector(NDVector &p, std::string vectorId) {
     for (int i=0; i<this->L; i++) {
         int hashKey = this->g(p, i);
         std::stringstream ss("");
@@ -71,13 +71,13 @@ void CosineSimilarityLSH::insertVector(NDVector p, std::string vectorId) {
     }
 }
 
-void CosineSimilarityLSH::insertDataset(std::unordered_map<std::string, NDVector> X) {
-    for (auto item : X){
+void CosineSimilarityLSH::insertDataset(std::unordered_map<std::string, NDVector> &X) {
+    for (auto &item : X){
         this->insertVector(item.second, item.first);
     }
 }
 
-std::set<std::string> CosineSimilarityLSH::retrieveNeighbors(NDVector p) {
+std::set<std::string> CosineSimilarityLSH::retrieveNeighbors(NDVector &p) {
 
     std::set<std::string> res;
     for (int i=0; i<this->L; i++) {

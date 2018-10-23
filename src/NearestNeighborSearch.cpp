@@ -4,19 +4,19 @@
 #include <csignal>
 
 
-std::pair<std::string, double>  nearestNeighbor(NDVector q, std::unordered_map<std::string, NDVector> X, double (*dist)(NDVector, NDVector) ){
+std::pair<std::string, double>  nearestNeighbor(NDVector& q, std::unordered_map<std::string, NDVector>& X, double (*dist)(NDVector&, NDVector&) ){
     double d, minDistance;
-    std::string minId, vectorId;
+    std::string minId, vectorId="";
     NDVector p;
 
+    for (auto &pair: X){
 
-    minDistance = 10e100; //TODO: change to first element
-
-    for (std::pair<std::string, NDVector> pair: X){
         vectorId = pair.first;
         p = pair.second;
 
         d = dist(p, q);
+
+        if (vectorId.empty()) minDistance = d; // initialization of distance with the first one
 
         if (d <= minDistance){
             minDistance = d;
@@ -28,18 +28,18 @@ std::pair<std::string, double>  nearestNeighbor(NDVector q, std::unordered_map<s
 }
 
 
-std::vector<std::string> range_nearestNeighbors(NDVector q, double R, std::unordered_map<std::string, NDVector> X, double (*dist)(NDVector, NDVector) ){
+std::vector<std::string> range_nearestNeighbors(NDVector& q, double R, std::unordered_map<std::string, NDVector>& X, double (*dist)(NDVector&, NDVector&) ){
 
     if (R<=0) throw std::logic_error("Nearest Neighbor called with zero or negative R value");
 
     std::vector<std::string> nearbyIds;
 
     double d;
-    NDVector p;
     std::string vectorId;
 
-    for (auto item : X){
-        NDVector p = item.second;
+    for (auto &item : X){
+
+        NDVector &p = item.second;
         vectorId = item.first;
 
         d = dist(q,p);

@@ -11,9 +11,7 @@ public:
 
         int len = number.size();
 
-
-        if (0){//(maxDistance == 1){
-
+        if (maxDistance == 1){
             this->sortedNeighbors.reserve(len);
 
             for (int i=0; i<len; i++){
@@ -21,10 +19,7 @@ public:
                 s[i] = (s[i] == '0') ? '1' : '0';
                 sortedNeighbors.push_back(s);
             }
-
         }else {
-
-
             try {
                 this->sortedNeighbors.reserve(len * maxDistance);
             } catch (std::bad_alloc &e) {
@@ -42,9 +37,6 @@ public:
         }
     }
 
-
-
-
     bool hashNext()      {return neighborsRetrieved < sortedNeighbors.size();}
     hammingNumber next() {return sortedNeighbors[neighborsRetrieved++];}
 
@@ -53,8 +45,6 @@ private:
     int maxDistance;
     std::vector<std::string> sortedNeighbors;
 
-
-    //todo: check what happens with references
     void findHammingNeighbors(std::string str, int i, int changesLeft) {
 
         if (changesLeft == 0) {
@@ -71,31 +61,30 @@ private:
 
 
 
-hammingNumber HypercubeProjection::projectPoint(NDVector p){
+hammingNumber HypercubeProjection::projectPoint(NDVector &p){
 
     std::stringstream ss("");
     for (auto h: H){
         ss << f((*h)(p));
     }
-
     hammingNumber number = ss.str();
     return number;
 }
 
-void HypercubeProjection::insertVector(NDVector p, std::string vectorId){
+void HypercubeProjection::insertVector(NDVector &p, std::string vectorId){
     hammingNumber number = this->projectPoint(p);
-    this->hashTable[number].push_back(vectorId); //TODO: possible seg here
+    this->hashTable[number].push_back(vectorId);
 }
 
 
-void HypercubeProjection::insertDataset(std::unordered_map<std::string, NDVector> X){
-    for (auto item : X){
+void HypercubeProjection::insertDataset(std::unordered_map<std::string, NDVector> &X){
+    for (auto &item : X){
         this->insertVector(item.second, item.first);
     }
 }
 
 
-std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
+std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector &p){
 
     int neighborsInserted = 0;
     int probesChecked = 1;
@@ -110,7 +99,7 @@ std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
         neighborIds.insert(id);
     }
 
-    HammingNeighborGenerator generator(hash, 1); //todo: change to something else
+    HammingNeighborGenerator generator(hash, 1);
     while (generator.hashNext()){
         if (probesChecked++ >= this->probes) return neighborIds;
 
@@ -123,7 +112,6 @@ std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector p){
             if (neighborsInserted++ >= this->M) return  neighborIds;
         }
     }
-
     return neighborIds;
 }
 

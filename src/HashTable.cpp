@@ -2,11 +2,6 @@
 #include "HashTable.h"
 
 
-
-
-
-
-
 HashTable::HashTable(int size)
         :size(size){
 
@@ -16,14 +11,9 @@ HashTable::HashTable(int size)
     }
 }
 
-
-
-
 void HashTable::insert(int position, Bucket bucket) {
     if (position >= this->size || position < 0) throw std::runtime_error("hash table overflow");
-
     this->array[position].emplace_back(bucket);
-
 }
 
 

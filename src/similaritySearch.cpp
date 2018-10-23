@@ -12,12 +12,12 @@
 void parse_lsh_arguments(int argc, char *argv[]);
 void parse_rph_arguments(int argc, char *argv[]);
 void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R,
-                        supported_metrics metric, std::string name);
+                        supported_metrics metric, std::string name, std::ofstream &output);
 
 
 namespace HyperParams {
-    int M = 4;  //TODO: check value
-    int w = 800;
+    int M = 4;
+    int w = 100;
 }
 
 
@@ -32,8 +32,8 @@ namespace Params {
 }
 
 
-//#define RUN_LSH
-#define RUN_RPH
+#define RUN_LSH
+//#define RUN_RPH
 
 int main(int argc, char *argv[]) {
 
@@ -46,8 +46,8 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-    Dataset X;
-    Dataset Y;
+    Dataset *X;
+    Dataset *Y;
     supported_metrics metric;
     double R;
 
@@ -56,33 +56,55 @@ int main(int argc, char *argv[]) {
     DatasetReader dr(Params::input_file);
     X = dr.readDataset();
     metric = dr.metric;
+    std::cout << "Done reading input dataset (" << X->size() << "x" << dr.vectorDim <<")" <<std::endl;
 
     QuerysetReader qr(Params::query_file);
     Y = qr.readDataset();
     R = qr.R;
+    std::cout << "Done reading query dataset (" << Y->size() << "x" << qr.vectorDim <<")" <<std::endl;
 
     if (dr.vectorDim != qr.vectorDim) throw std::runtime_error("Input datasets have different dimensions.");
 
 
+    std::ofstream fout;
+    fout.open(Params::output_file);
 
 #ifdef RUN_LSH
-    AbstractSimilaritySearch *LSH = new EuclideanSpaceLSH(Params::L, (int)X.size()/2, Params::k, dr.vectorDim, HyperParams::w);
-    similaritySearch(LSH, X, Y, R, metric, "LSH");
-    delete (EuclideanSpaceLSH *)LSH;
+    AbstractSimilaritySearch *LSH;
+
+    if (metric == Euclidean) {
+
+        LSH = new EuclideanSpaceLSH(Params::L, (int) X->size() / 2, Params::k, dr.vectorDim, HyperParams::w);
+
+        similaritySearch(LSH, *X, *Y, R, metric, "LSH", fout);
+
+        delete (EuclideanSpaceLSH *) LSH;
+
+    }else if (metric == Cosine) {
+        LSH = new CosineSimilarityLSH(Params::L, Params::k, dr.vectorDim);
+
+        similaritySearch(LSH, *X, *Y, R, metric, "LSH", fout);
+
+        delete (CosineSimilarityLSH *) LSH;
+    }
 #endif
 
 
 #ifdef RUN_RPH
     if (metric == Euclidean) {
-        AbstractSimilaritySearch *RPH = new EuclideanHypercubeProjection(Params::k, Params::M, Params::probes, X.size(), HyperParams::w, dr.vectorDim);
-        similaritySearch(RPH, X, Y, R, metric, "RPH");
+        AbstractSimilaritySearch *RPH = new EuclideanHypercubeProjection(Params::k, Params::M, Params::probes, X->size(), HyperParams::w, dr.vectorDim);
+        similaritySearch(RPH, *X, *Y, R, metric, "RPH", fout);
         delete (EuclideanHypercubeProjection *) RPH;
     }else if (metric == Cosine) {
-        AbstractSimilaritySearch *RPH = new CosineHypercubeProjection(Params::k, Params::M, Params::probes, X.size(), dr.vectorDim);
-        similaritySearch(RPH, X, Y, R, metric, "RPH");
+        AbstractSimilaritySearch *RPH = new CosineHypercubeProjection(Params::k, Params::M, Params::probes, X->size(), dr.vectorDim);
+        similaritySearch(RPH, *X, *Y, R, metric, "RPH", fout);
         delete (CosineHypercubeProjection *) RPH;
     }
 #endif
+
+    fout.close();
+    delete X;
+    delete Y;
 
     return 0;
 
@@ -90,9 +112,9 @@ int main(int argc, char *argv[]) {
 
 
 
-void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R, supported_metrics metric, std::string name){
+void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R, supported_metrics metric, std::string name, std::ofstream &output){
     //TODO: READERS SHOULD WORK WITH \t
-    auto &output = std::cout;
+    //auto &output = std::cout;
 
     NDVector                                  q;
     int                                       N;
@@ -112,7 +134,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
     double                                    sumApproxRatio = 0;
 
-    double (*distance)(NDVector, NDVector);
+    double (*distance)(NDVector&, NDVector&);
 
     N = (int)X.size();
 
@@ -121,11 +143,13 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
 
     searchStructure->insertDataset(X);
+    std::cout << "Done inserting vectorsv in " + name << std::endl;
 
     int i=0;
 
     for (auto item : Y){
-//        if (i++ == 5) break;
+        if (i == 5) break;
+        i++;
 
         begin = std::chrono::steady_clock::now();
 
@@ -162,8 +186,8 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
         //sumApproxRatio += currApproxRatio;
 
-/*        output << "Query: " << item.first << std::endl;
-        output << "=== " << possibleNeighborIds.size() << " vectors with same key ===" << std::endl;
+       output << "Query: " << item.first << std::endl;
+        //output << "=== " << possibleNeighborIds.size() << " vectors with same key ===" << std::endl;
         output << "R-near neighbors:" << std::endl;
         for (auto &id: neighborIds) output << id << std::endl;
         output << "Nearest neighbor: " << lshNN.first << std::endl;
@@ -172,7 +196,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
         output << "t"+name+": " << currApproxTime << " (ms)" <<std::endl;
         output << "tTrue: " << currDistanceTime << " (ms)" <<std::endl;
 
-        std::cout << "-------------------------\n" <<std::endl;*/
+        std::cout << "-------------------------\n" <<std::endl;
 
         sumApproxTime += currApproxTime;
         sumDistanceTime += currDistanceTime;
@@ -181,8 +205,8 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
     output << "----------------------------------------------" << std::endl;
     output << "Maximum approximation ratio: " << maxApproxRatio << std::endl;
     //output << "Mean approximation ratio: " << (sumApproxRatio / N) << std::endl;
-    output << "Mean approximate-NN time: " << (sumApproxTime / N) << " (ms)" << std::endl;
-    output << "Mean actual NN time: " << (sumDistanceTime / N) << " (ms)" << std::endl;
+    output << "Mean approximate-NN time: " << (sumApproxTime / i) << " (ms)" << std::endl;
+    output << "Mean actual NN time: " << (sumDistanceTime / i) << " (ms)" << std::endl;
 }
 
 
