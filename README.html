@@ -1,0 +1,133 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome file</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="αναπτυξη-εφαρμογων-για-αλγοριθμικα-προβληματα">ΑΝΑΠΤΥΞΗ ΕΦΑΡΜΟΓΩΝ ΓΙΑ ΑΛΓΟΡΙΘΜΙΚΑ ΠΡΟΒΛΗΜΑΤΑ</h1>
+<h2 id="εργασια-1----20182019">ΕΡΓΑΣΙΑ 1  - 2018/2019</h2>
+<h3 id="κυριάκος-στυλιανόπουλος---1115201400194">Κυριάκος Στυλιανόπουλος - 1115201400194</h3>
+<h2 id="σχετικά-με-το-παραδοτέο">Σχετικά με το παραδοτέο</h2>
+<p>Η παρουσίαση των αρχείων σε δενδρική μορφή είναι η ακόλουθη:</p>
+<pre><code>.
+├── include                          : Τοποθεσία των αρχείων επικεφαλίδων
+│   ├── AbstractSimilaritySearch.h   : Γενικό interface που ακολουθουν οι δομές LSH και Hypercube
+│   ├── CosineSimilarityLSH.h        : Η κλάση της δομής LSH για την περίπτωση της απόστασης συνημιτόνου
+│   ├── EuclideanSpaceLSH.h          : Η κλάση της δομής LSH για την περίπτωση της Ευκλείδειας απόστασης
+│   ├── HashTable.h                  : Πίνακας κατακερματισμού που χρησιμοποιείται στο LSH
+│   ├── HypercubeProjection.h        : Οι δομές για την προβολή στον υπερκύβο
+│   ├── metrics.h                    : Δήλωση των μετρικών ως συναρτήσεων
+│   ├── NDVector.h                   : Κλάση διανύσματος Ν-διάστατου χώρου
+│   ├── NearestNeighborSearch.h      : Οι συναρτήσεις Nearest Neighbor και Range Nearest Neighbors
+│   ├── similaritySearch.h           : Abstract interface των κλάσεων του LSH
+│   └── VectorTSVReader.h            : Κλάσεις για parsing των input files
+├── install_boost.sh                 : Τοπική εγκατάσταση βιβλιοθήκης
+├── libs                             : Τοποθεσία της βιβλιοθήκης Boost
+├── Makefile                         : Δημιουργία των εκτελέσιμων προγραμμάτων
+├── README.html                      : Το παρόν αρχείο
+└── src                              : Τοποθεσία των αρχείων κώδικα (περιγραφή αντίστοιχη με τα .h)
+    ├── CosineSimilarityLSH.cpp
+    ├── EuclideanSpaceLSH.cpp
+    ├── HashTable.cpp
+    ├── HypercubeProjection.cpp
+    ├── metrics.cpp
+    ├── NDVector.cpp
+    ├── NearestNeighborSearch.cpp
+    ├── similaritySearch.cpp         : Το αρχείο κώδικα που περιέχει τη main()
+    └── VectorTSVReader.cpp
+</code></pre>
+<h2 id="μεταγλώττιση-και-εκτέλεση">Μεταγλώττιση και Εκτέλεση</h2>
+<p><strong>Πριν τη μεταγλώττιση</strong> του προγράμματος εκτελέστε το <code>install_boost.sh</code>:</p>
+<pre class=" language-bash"><code class="prism  language-bash">$ sh ./install_boost.sh
+</code></pre>
+<p>Το script θα εγκαταστήσει την βιβλιοθήκη <em>“program_options”</em> της <em>Boost</em> τοπικά (μέσα σε subdirectory του <em>./libs/</em>), έτσι ώστε με τη διαγραφή του directory της εργασίας να διαγραφεί και η ίδια. Το βήμα αυτό μπορεί να παραληφθεί αν το σύστημα της εγκατάστασης έχει προεγκατεστημένη την παραπάνω βιβλιοθήκη <em>(boost1_68)</em> και τόσο το .so αρχείο όσο και τα αντίστοιχα headers βρίσκονται στις default τοποθεσίες ώστε να αναγνωριστούν από τον g++.</p>
+<p><strong>Για να μεταγλωττίσετε</strong> το πρόγραμμα, απλά πληκτρολογείστε</p>
+<pre class=" language-bash"><code class="prism  language-bash">$ <span class="token function">make</span>
+</code></pre>
+<p>Το οποίο θα δημιουργήσει τα εκτελέσιμα <code>lsh</code> και <code>cube</code> στο παρόν directory. Εναλλακτικά, εκτελέσετε</p>
+<pre class=" language-bash"><code class="prism  language-bash">$ <span class="token function">make</span> lsh
+</code></pre>
+<p>ή</p>
+<pre class=" language-bash"><code class="prism  language-bash">$ <span class="token function">make</span> cube
+</code></pre>
+<p>για τη δημιουργία μόνο του ενός εκτελέσιμου.</p>
+<p><strong>Η εκτέλεση</strong> των παραπάνω αρχείων γίνεται με τις παραμέτρους που προσδιορίστηκαν στην εκφώνηση. Μπορείτε να τα τρέξετε με όρισμα <code>--help</code> για να αναλυτική περιγραφή των ορισμάτων της γραμμής εντολών.</p>
+<h2 id="λεπτομέρειες-σχεδίασης-και-υλοποίησης">Λεπτομέρειες σχεδίασης και υλοποίησης</h2>
+<p>Ο κώδικας υλοποιήθηκε με τη χρήση της C++ (standard 2011). Χρησιμοποιήθηκε η STL  για τις περισσότερες εσωτερικές δομές και η βιβλιοθήκη Boost μόνο για να διευκολύνει το διάβασμα των ορισμάτων της γραμμής εντολών. Θεώρησα πως το σημείο αυτό είναι πολύ δευτερεύον γι αυτό και χρησιμοποίησα 3rd party library.<br>
+Γενικά χρησιμοποιήθηκε αντικειμενοστραφής σχεδιαση με τη χρήση κληρονομικότητας και abstract interfaces.</p>
+<p>Κατά τη διάρκεια της γραφής του κώδικα, χρησιμοποιήθηκε το <em>git</em> ως version control system και το GitHub ως remote repository. Μάλιστα, χρησιμοποιήθηκαν εκτενώς τα λοιπά feature που προσφέρει το GitHub (Pull Requests, Issues, Projects). Επίσης μεγάλο μέρος του κώδικα καλύπτεται από unit tests (χρησιμοποιώντας το google test), ωστόσο δεν θα έλεγα πως έγινε κανονικό “test driven development”.</p>
+<p>Σημεία του κώδικα που αξίζει να επισημανθούν:</p>
+<ul>
+<li>Υλοποιήθηκε η κλάση <code>NDVector</code> ώστε να αναπαριστώνται διανύσματα του n-διάστατου χώρου. Αν και θα μπορούσα να έχω χρησιμοποιήσει το <code>std::vector&lt;double&gt;</code> για την ίδια δουλειά θεώρησα πως είχε νόημα να γράψω συγκεκριμένη κλάση. Επίσης χρησιμοποιήθηκε operator overloading για να υλοποιηθούν οι συνιθισμένες διανυσματικές πράξεις (οι οποίες βέβαια, πέρα από το εσωτερικο γινόμενο και την ευκλείδεια νόρμα δεν χρειάζονται).</li>
+<li>Τα dataset αναμένεται να έχουν τη μορφή της εκφώνησης (δηλαδή η πρώτη στήλη να περιέχει το <em>item_id</em> και οι στήλες να είναι χωρισμένες με <em>ΤΑΒ</em>). Τα <em>item_id</em> αποθηκεύονται ως strings εσωτερικά στο πρόγραμμα.  Είναι δυνατό να περιέχονται κενές γραμμές στην αρχή του κάθε αρχείου.</li>
+<li>Αφού γίνει ο υπολογισμός του <code>g(p)</code> στο ευκλείδειο LSH, για την εύρεση της θέσης του πίνακα στο hash table δε χρησιμοποιείται η <code>φ(p)</code> όπως προείνεται στην εκφώνηση. Αντίθετα, μετατρέπεται το <code>g(p)</code> σε string και χρησιμοποιείται η default hash function της STL.</li>
+<li>Κατά την εκτέλεση του προγράμματος εκτυπώνονται μερικά μηνύματα προόδου, τα στατιστικά που ζητούνται καθώς και μερικά ακόμα σχετικά στατιστικά. Παράδειγμα εκτέλεσης:
+<blockquote>
+<blockquote>
+<p>Done reading input dataset (10000x128)<br>
+Done reading query dataset (100x128)<br>
+Done inserting vectors in LSH<br>
+Wrote results in output file.</p>
+<p>-Maximum approximation ratio: 2.70364 (id_21)<br>
+-Mean approximation ratio: 1.21405<br>
+-Mean approximate Nearest Neighbor time: 2.5 (ms)<br>
+-Mean actual Nearest Neighbor time: 111.82 (ms)<br>
+-Mean number of vectors searched exhaustively per query: 204<br>
+-Number of true Nearest Neighbors found: 34</p>
+</blockquote>
+</blockquote>
+</li>
+</ul>
+<p>-Maximum approximation ratio: 2.70364 (id_21)<br>
+-Mean approximation ratio: 1.21405<br>
+-Mean approximate Nearest Neighbor time: 2.5 (ms)<br>
+-Mean actual Nearest Neighbor time: 111.82 (ms)<br>
+-Mean number of vectors searched exhaustively per query: 204<br>
+-Number of true Nearest Neighbors found: 34</p>
+<ul>
+<li>Στο κομμάτι του υπερκύβου, για κάθε σημείο του query set, παράγονται (ως αριθμοί) κατά αύξουσα σειρά απόστασης όλοι οι γείτονες Hamming της αντίστοιχης κορυφής (χωρίς να σημαίνει ότι ελέγχονται όλες οι κορυφές). Η διαδικασία αυτή έχει σχετικά μικρό overhead μνήμης και αμελητέα χρονική επιβάρυνση αλλά με διευκόλυνε να μην έχω περιορισμό στις τιμές των παραμέτρων κατά τις δοκιμές.</li>
+</ul>
+<h2 id="βελτιστοποιήσεις">Βελτιστοποιήσεις</h2>
+<ul>
+<li>Στο κομμάτι του ευκλείδειου LSH, η “υπερπαράμετρος” <code>w</code> επηρεάζεται σε μεγάλο βαθμό  από τη διάσταση του χώρου. Διαισθητικά μπορούμε να υποθέσουμε γιατί συμβαίει αυτό αν αναλογιστούμε πως ο σκοπός είναι διανύσματα που είναι αρκούντως κοντά, να προβάλλονται πάνω στο ίδιο “w-οστό”. Επειδή, είναι γνωστό από τη βιβλιογραφία πως η αναμενώμενη απόσταση δύο διανυσμάτων αυξάνει γραμμικά με το μέγεθος των διαστάσεων (<em>Παράγραφος 2.3, παρατήρηση 5,</em> <strong>[1]</strong>), αυτό σημαίνει πως για σταθερή τιμή του <code>w</code>, η πιθανότητα δύο διανύσματα να έχουν την ίδια τιμή για κάποια <code>h()</code> μειώνεται με την αύξηση των διαστάσεων. Στις 128 διαστάσεις που αποτελούσαν τον διανυσματικό χώρο των dataset που δώθηκαν, το πρόβλημα αυτό φάνηκε στην πράξη. Για τιμές του w μικρότερες του 100, ελάχιστα διανύσματα είχαν κοινό <code>g(p)</code> μεταξύ τους. Για τις τιμές [200-300] ενώ για κάθε query datapoint ο αριθμός των αποθηκευμένων διανυσμάτων με κοινό <code>g(p)</code> συνήθως ήταν διψήφιος. Επειδή λοιπόν η παράμετρος αυτή εξαρτάται από τη φύση του dataset, το πρόγραμμα υπολογίζει το w ως:</li>
+</ul>
+<pre class=" language-c"><code class="prism ++ language-c">w <span class="token operator">=</span> <span class="token function">floor</span><span class="token punctuation">(</span> t <span class="token operator">*</span> dim <span class="token punctuation">)</span>
+</code></pre>
+<p>όπου <code>dim</code> είναι η διάσταση του χώρου των dataset και <code>t</code> μια <code>real</code> παράμετρος από το χρήστη<br>
+που προσδιορίζει πόσο μεγάλη η μικρή διακριτοποίηση θέλουμε να επιτύχουμε κατά την εκτέλεση. Τα εκτελέσιμα μπορούν να κληθούν με το όρισμα <code>-t X</code> ώστε να προσδιορίσουν κατάλληλη τιμή (default 3.0).</p>
+<ul>
+<li>Τα διανύσματα δεν αποθηκεύονται μέσα στις ίδιες τις δομές αλλά σε ευρετήρια στο top level abstraction του προγράμματος. Οι δομές αναζήτησης αν και χρησιμοποιούν τα διανύσματα για τις σχετικές πράξεις, εντούτοις αποθηκεύουν μόνο τα id τους και αντίστοιχα επιστρέφουν τα κατάλληλα για κάθε query datapoint.</li>
+</ul>
+<h2 id="σύγκριση-lsh---hypercube-projection">Σύγκριση LSH - Hypercube Projection</h2>
+<p>Όπως ζητήθηκε, εκτελέστηκαν και οι δύο τρόποι στο ίδιο dataset <em>(shift-small, με την ευκλείδεια νόρμα ως μετρική)</em> με τις κατάλληλες παραμέτρους ώστε να επιτύχουν και οι δύο το ίδιο μέγιστο κλάσμα προσέγγισης.  Στη συνέχεια παραθέτονται αποτελέσματα και μετρήσεις από την εκτέλεσή τους:</p>
+<pre class=" language-c"><code class="prism  language-c"><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+<span class="token operator">|</span> Method                                                 <span class="token operator">|</span>   LSH   <span class="token operator">|</span> Hypercube<span class="token operator">|</span>
+<span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+<span class="token operator">|</span>                                                        <span class="token operator">|</span> k <span class="token operator">=</span> <span class="token number">3</span>   <span class="token operator">|</span> k' <span class="token operator">=</span> <span class="token number">9</span>   <span class="token operator">|</span>
+<span class="token operator">|</span> Parameters                                             <span class="token operator">|</span> L <span class="token operator">=</span> <span class="token number">3</span>   <span class="token operator">|</span> probes<span class="token operator">=</span><span class="token number">2</span> <span class="token operator">|</span>
+<span class="token operator">|</span>                                                        <span class="token operator">|</span> w <span class="token operator">=</span> <span class="token number">380</span> <span class="token operator">|</span> w <span class="token operator">=</span> <span class="token number">473</span>  <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+<span class="token operator">|</span> Maximum approximation ratio                            <span class="token operator">|</span> <span class="token number">2.54</span>    <span class="token operator">|</span>  <span class="token number">2.56</span>    <span class="token operator">|</span>
+<span class="token operator">|</span> Mean approximate Nearest Neighbor <span class="token function">time</span> <span class="token punctuation">(</span>ms<span class="token punctuation">)</span>            <span class="token operator">|</span> <span class="token number">8.87</span>    <span class="token operator">|</span>  <span class="token number">2.27</span>    <span class="token operator">|</span>
+<span class="token operator">|</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+<span class="token operator">|</span> Memory <span class="token function">usage</span> <span class="token punctuation">(</span>structures only<span class="token punctuation">)</span><span class="token punctuation">(</span>MiB<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token operator">*</span><span class="token punctuation">)</span>                <span class="token operator">|</span> <span class="token number">2.6</span>     <span class="token operator">|</span>  <span class="token number">0.5</span>     <span class="token operator">|</span>
+<span class="token operator">|</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+<span class="token operator">|</span> Mean approximation ratio                               <span class="token operator">|</span> <span class="token number">1.11</span>    <span class="token operator">|</span>  <span class="token number">1.27</span>    <span class="token operator">|</span>
+<span class="token operator">|</span> Mean number of vectors searched exhaustively per query <span class="token operator">|</span> <span class="token number">685.93</span>  <span class="token operator">|</span>  <span class="token number">305.18</span>  <span class="token operator">|</span>
+<span class="token operator">|</span> Number of true Nearest Neighbors found                 <span class="token operator">|</span> <span class="token number">48</span>      <span class="token operator">|</span>  <span class="token number">28</span>      <span class="token operator">|</span>
+<span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span><span class="token operator">+</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">--</span><span class="token operator">+</span>
+</code></pre>
+<p>Όπως διαπιστώνουμε, η προβολή στον υπερκύβο πέτυχε σχεδόν ολόιδιο αποτέλεσμα ως προς το μέγιστο σφάλμα προσέγγισης μειώνοντας τον χρόνο ανά query point στο 1/4 και τη μνήμη που χρειάζεται η αποθηευτική δομή στο 1/5.  Μάλισα, το LSH κατέληξε να ψάχνει τα διπλάσια datapoints ανά query.<br>
+Ωστόσο να θέλαμε να αναφέρουμε πως το παραπάνω συμπέρασμα δε φανερώνει όλη την αλήθεια για τη σύγκριση των δύο μεθόδων. Αρχικά, δεν μπόρεσα να εκτελέσω τα προγράμματα πολλές φορές και να βγάλω μέσους όρους διότι ήταν πολύ δύσκολο να βρεθεί ξανά κοινό κλάσμα προσέγγισης. Έπειτα, δεν φαίνονται δύο σημαντικά πλεονεκτήματα του LSH έναντι του Hypercube: α) ότι εύκολα μπορεί να μειώσει αρκετά το maximum approximation ratio (ώστε να τείνει στο 1) και β) ότι έχει μικρότερη διακύμανση στα αποτελέσματα ανά εκτέλεση.</p>
+<hr>
+<p>(*): Η μέτρηση της μνήμης έγινε με τη χρήση του εργαλείου <strong>massif</strong> του <strong>valgrind</strong>. Η χρήση μνήμης των δομών αποθήκευσης συγκεκριμένα έγινε μετρώντας το memory usage του κάθε εκτελέσιμου μέχρι το σημείο της εισαγωγής των διανυσμάτων στις δομές και ύστερα αφαιρώντας τα προϋπολογισμένα overheads (συνολικού χώρου 10.6 MiB) για τις λοιπές λειτουργίες του προγράμματος. Κατά αυτόν τον τρόπο δεν υπολογίζεται στον πίνακα ο χώρος που απαιτείται για να αποθηκευτούν στα διανύσματα (10.24 MiB για το dataset στο σύστημά μου), αφού αρχικά δεν αποθηκεύονται μέσα στις ίδιες τις δομές αλλά σε ευρετήριο κι επίσης επειδή δεν έχει νόημα ο υπολογισμός τους (κάθε μέθοδος πρέπει να αποθηκεύσει κάπου τα διανύσματα). Λόγω της σχεδίασης και της υλοποίησης επίσης (pointers, indexes, references, STL classes, κλπ) δεν είχε νόημα να χρησιμοποιηθεί και η συνάρτηση/τελεστής <code>sizeof()</code>.</p>
+<p><strong>[1]</strong>: <em>Weber, Schek, Blott - A Quantitative Analysis and Performance Study for Similarity-Search Methods in High-Dimensional Spaces</em> <a href="https://pdfs.semanticscholar.org/63ea/eb0c48175065ffd096aad10aed712c6d7bbb.pdf">https://pdfs.semanticscholar.org/63ea/eb0c48175065ffd096aad10aed712c6d7bbb.pdf</a></p>
+</div>
+</body>
+
+</html>
