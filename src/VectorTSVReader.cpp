@@ -72,6 +72,37 @@ Dataset* VectorTSVReader::readDataset() {
     return dataset;
 }
 
+OrderedDataset* VectorTSVReader::readOrderedDataset() {
+
+    this->inputFile.open(this->filename, std::ios::in);
+
+    parseFirstLine();
+
+    OrderedDataset* dataset = new std::map<std::string, NDVector>();
+
+    std::pair<std::string, std::vector<double>> nextVector;
+
+    nextVector = parseNextLine();
+
+
+    while(!nextVector.first.empty()){
+
+        NDVector v(nextVector.second);
+
+        if (! this->vectorDim) this->vectorDim = (int)v.dim();
+
+        if (v.dim() != this->vectorDim) throw std::runtime_error("\""+filename+"\" dataset contains vector of varying dimensions.");
+
+        (*dataset)[nextVector.first] = v;
+
+        nextVector = parseNextLine();
+    }
+
+    this->inputFile.close();
+    return dataset;
+}
+
+
 void DatasetReader::parseFirstLine() {
     std::string line;
 

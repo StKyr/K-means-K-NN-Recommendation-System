@@ -5,9 +5,6 @@
 #include <ctime>
 #include <cstdlib>
 
-//std::vector<std::set<std::string>> allKeys;
-
-
 
 
 hEucl::hEucl(int w, int d) :w(w) {
@@ -30,10 +27,9 @@ hEucl::hEucl(int w, int d) :w(w) {
 
 
 int hEucl::operator () (NDVector &p){
-    double prod = v.dot(p);
+    double prod = v.dot(p);                          // code is in pieces for easy debug
     double x    = ( prod + t ) / w;
     int    y    = static_cast <int> (std::floor(x));
-    //int    z    = y + ((x > 0 ) ? 1 : -1);  //TODO: CHECK THIS
     return y;
 }
 
@@ -66,8 +62,6 @@ EuclideanSpaceLSH::EuclideanSpaceLSH(int L, int tableSize, int k, int d, int w)
         for (int j=0; j<k; j++){
             H[i].emplace_back(new  hEucl(w, d) );
         }
-
-        //allKeys.emplace_back(std::set<std::string>());
     }
 }
 
@@ -90,8 +84,6 @@ void EuclideanSpaceLSH::insertVector(NDVector &p, std::string vectorId){
 
         this->hashTables[i].insert(hashKey, bucket);
 
-
-        //allKeys[i].insert(g_key);
     }
 }
 
@@ -133,7 +125,7 @@ std::string EuclideanSpaceLSH::g(NDVector p, int j){
     for (auto &h_i : h){
         ss << (*h_i)(p) << ",";
     }
-    ss << "\b}";
+    ss << "}";
 
     std::string key_str = ss.str();
     return key_str;

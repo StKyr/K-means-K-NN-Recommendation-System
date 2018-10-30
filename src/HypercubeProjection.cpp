@@ -64,8 +64,9 @@ private:
 hammingNumber HypercubeProjection::projectPoint(NDVector &p){
 
     std::stringstream ss("");
-    for (auto h: H){
-        ss << f((*h)(p));
+    for (int i=0; i<H.size(); i++){
+        hFunction *h = H[i];
+        ss << f((*h)(p), i);
     }
     hammingNumber number = ss.str();
     return number;
@@ -99,7 +100,7 @@ std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector &p){
         neighborIds.insert(id);
     }
 
-    HammingNeighborGenerator generator(hash, 1);
+    HammingNeighborGenerator generator(hash, hash.size());
     while (generator.hashNext()){
         if (probesChecked++ >= this->probes) return neighborIds;
 
@@ -119,8 +120,11 @@ std::set<std::string> HypercubeProjection::retrieveNeighbors(NDVector &p){
 EuclideanHypercubeProjection::EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d)
     :HypercubeProjection(d_, M, probes, N){
 
-    for (int i=0; i<d_; i++) H.emplace_back(new hEucl(w,d));
-    srand(time(NULL));
+    h_to_f_index.reserve(d_);
+    for (int i=0; i<d_; i++){
+        H.emplace_back(new hEucl(w,d));
+        h_to_f_index.emplace_back(std::unordered_map<int, int>());
+    }
 }
 
 EuclideanHypercubeProjection::~EuclideanHypercubeProjection(){
@@ -130,14 +134,16 @@ EuclideanHypercubeProjection::~EuclideanHypercubeProjection(){
 }
 
 
-int EuclideanHypercubeProjection::f(int h_p){
+int EuclideanHypercubeProjection::f(int h_p, int i){
 
-    if (h_to_f_index.find(h_p) == h_to_f_index.end()){
-
-        h_to_f_index[h_p] = rand() % 2;
+    if (h_to_f_index[i].find(h_p) == h_to_f_index[i].end()){
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dist_uniform(0,100); // range doesn't matter
+        h_to_f_index[i][h_p] = dist_uniform(gen) % 2;
     }
 
-    return h_to_f_index[h_p];
+    return h_to_f_index[i][h_p];
 }
 
 

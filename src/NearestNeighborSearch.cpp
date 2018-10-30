@@ -6,7 +6,7 @@
 
 std::pair<std::string, double>  nearestNeighbor(NDVector& q, std::unordered_map<std::string, NDVector>& X, double (*dist)(NDVector&, NDVector&) ){
     double d, minDistance;
-    std::string minId, vectorId="";
+    std::string minId="", vectorId;
     NDVector p;
 
     for (auto &pair: X){
@@ -16,7 +16,7 @@ std::pair<std::string, double>  nearestNeighbor(NDVector& q, std::unordered_map<
 
         d = dist(p, q);
 
-        if (vectorId.empty()) minDistance = d; // initialization of distance with the first one
+        if (minId.empty()) minDistance = d; // initialization of distance with the first one
 
         if (d <= minDistance){
             minDistance = d;

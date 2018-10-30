@@ -1,7 +1,7 @@
 #ifndef ERGASIA1_HYPERCUBEPROJECTION_H
 #define ERGASIA1_HYPERCUBEPROJECTION_H
 
-
+#include <random>
 #include <unordered_map>
 #include <set>
 #include "NDVector.h"
@@ -42,12 +42,10 @@ public:
 
     virtual ~HypercubeProjection() {}
 
-
-
 protected:
     int d_;
     std::vector<hFunction *> H;
-    virtual int f(int h_p) =0;
+    virtual int f(int h_p, int i) =0;
 
 private:
 
@@ -69,12 +67,12 @@ private:
 class EuclideanHypercubeProjection : public HypercubeProjection {
 public:
 
-    EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d) ;
+    EuclideanHypercubeProjection(int d_, int M, int probes, int N, int w, int d);
     ~EuclideanHypercubeProjection() override;
 
 private:
-    std::unordered_map<int, int> h_to_f_index;
-    int f(int h_p) override;
+    std::vector<std::unordered_map<int, int>> h_to_f_index;
+    int f(int h_p, int i) override;
 };
 
 
@@ -87,8 +85,9 @@ public:
     ~CosineHypercubeProjection() override;
 
 private:
-    int f(int h_p) override {return h_p;}
+    int f(int h_p, int i) override {return h_p;}
 };
+
 
 
 

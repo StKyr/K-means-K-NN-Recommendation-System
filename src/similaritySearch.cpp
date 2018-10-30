@@ -11,13 +11,13 @@
 
 void parse_lsh_arguments(int argc, char *argv[]);
 void parse_rph_arguments(int argc, char *argv[]);
-void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R,
+void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, OrderedDataset& Y, double R,
                         supported_metrics metric, std::string name, std::ofstream &output);
 
 
 namespace HyperParams {
     int M = 4;
-    int w = 100;
+    int w = 4;
 }
 
 
@@ -29,11 +29,9 @@ namespace Params {
     std::string output_file;
     int M;
     int probes;
+    double t;
 }
 
-
-#define RUN_LSH
-//#define RUN_RPH
 
 int main(int argc, char *argv[]) {
 
@@ -47,7 +45,7 @@ int main(int argc, char *argv[]) {
 
 
     Dataset *X;
-    Dataset *Y;
+    OrderedDataset *Y;
     supported_metrics metric;
     double R;
 
@@ -59,12 +57,14 @@ int main(int argc, char *argv[]) {
     std::cout << "Done reading input dataset (" << X->size() << "x" << dr.vectorDim <<")" <<std::endl;
 
     QuerysetReader qr(Params::query_file);
-    Y = qr.readDataset();
+    Y = qr.readOrderedDataset();
     R = qr.R;
     std::cout << "Done reading query dataset (" << Y->size() << "x" << qr.vectorDim <<")" <<std::endl;
 
     if (dr.vectorDim != qr.vectorDim) throw std::runtime_error("Input datasets have different dimensions.");
 
+
+    HyperParams::w = (int)floor(Params::t * dr.vectorDim);
 
     std::ofstream fout;
     fout.open(Params::output_file);
@@ -112,10 +112,7 @@ int main(int argc, char *argv[]) {
 
 
 
-void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dataset& Y, double R, supported_metrics metric, std::string name, std::ofstream &output){
-    //TODO: READERS SHOULD WORK WITH \t
-    //auto &output = std::cout;
-
+void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, OrderedDataset& Y, double R, supported_metrics metric, std::string name, std::ofstream &output){
     NDVector                                  q;
     int                                       N;
     std::set<std::string>                     possibleNeighborIds;
@@ -133,6 +130,9 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
     std::chrono::steady_clock::time_point     end;
 
     double                                    sumApproxRatio = 0;
+    int n_found = 0;
+    int n_searched = 0;
+    std::string maxRatioId;
 
     double (*distance)(NDVector&, NDVector&);
 
@@ -143,12 +143,11 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
 
     searchStructure->insertDataset(X);
-    std::cout << "Done inserting vectorsv in " + name << std::endl;
+    std::cout << "Done inserting vectors in " + name << std::endl;
 
     int i=0;
 
     for (auto item : Y){
-        if (i == 5) break;
         i++;
 
         begin = std::chrono::steady_clock::now();
@@ -177,17 +176,19 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
 
         if (trueNN.second != 0 && !isnan(maxApproxRatio)){
             currApproxRatio = lshNN.second / trueNN.second;
-            if (currApproxRatio > maxApproxRatio) maxApproxRatio = currApproxRatio;
+            if (currApproxRatio > maxApproxRatio){ maxApproxRatio = currApproxRatio; maxRatioId = item.first;}
+            sumApproxRatio += currApproxRatio;
         }else if (lshNN.second == 0){
             maxApproxRatio = 1;
+            sumApproxRatio += 1;
         }else{
             maxApproxRatio = nan("");
         }
+        n_searched++;
 
-        //sumApproxRatio += currApproxRatio;
+        if (lshNN.first == trueNN.first) n_found ++;
 
-       output << "Query: " << item.first << std::endl;
-        //output << "=== " << possibleNeighborIds.size() << " vectors with same key ===" << std::endl;
+        output << "Query: " << item.first << std::endl;
         output << "R-near neighbors:" << std::endl;
         for (auto &id: neighborIds) output << id << std::endl;
         output << "Nearest neighbor: " << lshNN.first << std::endl;
@@ -195,18 +196,19 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Dat
         output << "distanceTrue: " << trueNN.second <<std::endl;
         output << "t"+name+": " << currApproxTime << " (ms)" <<std::endl;
         output << "tTrue: " << currDistanceTime << " (ms)" <<std::endl;
-
-        std::cout << "-------------------------\n" <<std::endl;
+        output<<std::endl;
 
         sumApproxTime += currApproxTime;
         sumDistanceTime += currDistanceTime;
     }
 
-    output << "----------------------------------------------" << std::endl;
-    output << "Maximum approximation ratio: " << maxApproxRatio << std::endl;
-    //output << "Mean approximation ratio: " << (sumApproxRatio / N) << std::endl;
-    output << "Mean approximate-NN time: " << (sumApproxTime / i) << " (ms)" << std::endl;
-    output << "Mean actual NN time: " << (sumDistanceTime / i) << " (ms)" << std::endl;
+    std::cout << "Wrote results in output file.\n" << std::endl;
+
+    std::cout << "-Maximum approximation ratio: " << maxApproxRatio << " (" << maxRatioId << ")" << std::endl;
+    std::cout << "-Mean approximation ratio: " << sumApproxRatio / n_searched << std::endl;
+    std::cout << "-Mean approximate Nearest Neighbor time: " << (sumApproxTime / i) << " (ms)" << std::endl;
+    std::cout << "-Mean actual Nearest Neighbor time: " << (sumDistanceTime / i) << " (ms)" << std::endl;
+    std::cout << "-Number of true Nearest Neighbors found: " << n_found << std::endl;
 }
 
 
@@ -223,6 +225,7 @@ void parse_lsh_arguments(int argc, char *argv[]){
             ("-o", value<std::string>(),                   "set output file")
             ("-k", value<int>()->default_value(4),         "set number of LSH hashes")
             ("-L", value<int>()->default_value(5),         "set number of LSH hash tables")
+            ("-t", value<double>()->default_value(3.5),    "fine grained or coarse vs coarse grained discretization")
             ;
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -239,6 +242,7 @@ void parse_lsh_arguments(int argc, char *argv[]){
     else {std::cout<< "Parameter -o is mandatory" << std::endl; exit(1);}
     Params::k = vm["-k"].as<int>(); if (Params::k <= 0) {std::cout<< "Invalid value of parameter -k" << std::endl; exit(1);}
     Params::L = vm["-L"].as<int>(); if (Params::L <= 0) {std::cout<< "Invalid value of parameter -L" << std::endl; exit(1);}
+    Params::t = vm["-t"].as<double>(); if (Params::t <= 0) {std::cout<< "Invalid value of parameter -t" << std::endl; exit(1);}
 }
 
 
@@ -246,13 +250,14 @@ void parse_rph_arguments(int argc, char *argv[]){
     using namespace boost::program_options;
     options_description desc("Allowed options");
     desc.add_options()
-            ("help",   "produce help message")
+            ("help",                                           "produce help message")
             ("-d",     value<std::string>(),                   "set input file")
             ("-q",     value<std::string>(),                   "set query file")
             ("-o",     value<std::string>(),                   "set output file")
             ("-k",     value<int>()->default_value(3),         "set number of bits in hypercube representation")
-            ("-M",      value<int>()->default_value(10),       "set maximum number of points for inspection")
-            ("-probes", value<int>()->default_value(10),       "set maximum number of hypercube vertices for inspection")
+            ("-M",     value<int>()->default_value(10),        "set maximum number of points for inspection")
+            ("probes", value<int>()->default_value(10),        "set maximum number of hypercube vertices for inspection")
+            ("-t",     value<double>()->default_value(3.5),    "fine grained or coarse vs coarse grained discretization")
             ;
     variables_map vm;
     store(parse_command_line(argc, argv, desc), vm);
@@ -269,5 +274,7 @@ void parse_rph_arguments(int argc, char *argv[]){
     else {std::cout<< "Parameter -o is mandatory" << std::endl; exit(1);}
     Params::k = vm["-k"].as<int>(); if (Params::k <= 0) {std::cout<< "Invalid value of parameter -k" << std::endl; exit(1);}
     Params::M = vm["-M"].as<int>(); if (Params::M <= 0) {std::cout<< "Invalid value of parameter -M" << std::endl; exit(1);}
-    Params::probes = vm["-probes"].as<int>(); if (Params::probes <= 0) {std::cout<< "Invalid value of parameter -probes" << std::endl; exit(1);}
+    Params::probes = vm["probes"].as<int>(); if (Params::probes <= 0) {std::cout<< "Invalid value of parameter --probes" << std::endl; exit(1);}
+    Params::t = vm["-t"].as<double>(); if (Params::t <= 0) {std::cout<< "Invalid value of parameter -t" << std::endl; exit(1);}
+
 }
