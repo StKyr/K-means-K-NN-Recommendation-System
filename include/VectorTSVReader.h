@@ -16,7 +16,7 @@ typedef std::map<std::string, NDVector> OrderedDataset;
 class VectorTSVReader {
 public:
 
-    explicit        VectorTSVReader   (std::string& flename) :filename(flename), vectorDim(0) {}
+    explicit        VectorTSVReader   (std::string& flename, char delimiter='\t') :filename(flename), vectorDim(0), delimiter(delimiter) {}
     Dataset*        readDataset       ();
     OrderedDataset* readOrderedDataset();
                     ~VectorTSVReader  ()                    {if (this->inputFile.is_open()) this->inputFile.close();}
@@ -26,6 +26,7 @@ public:
 protected:
     std::string   filename;
     std::ifstream inputFile;
+    char delimiter;
 
     std::pair<std::string, std::vector<double>> parseNextLine();
     virtual void                                parseFirstLine() = 0;

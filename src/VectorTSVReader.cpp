@@ -23,19 +23,25 @@ std::pair<std::string, std::vector<double>> VectorTSVReader::parseNextLine(){
             if (getline(this->inputFile, line)) {   // get a whole line
 
                 std::stringstream ss(line);
-                getline(ss, part, '\t');
+                getline(ss, part, delimiter);
 
                 vectorId = part;
 
-                while (getline(ss, part, ' ')) {
-                    std::stringstream xstream(part);
-                    xstream >> x;
-                    v.push_back(x);
+                try {
+                    while (getline(ss, part, delimiter)) {
+                        x = stod(part);
+                        v.push_back(x);
+                    }
+
+                }catch (std::exception &e){ // possible '\r' character before new line
+                    if (part != "\r"){
+                        throw e;
+                    }
                 }
             }
 
         }catch(std::exception& e) {
-            throw std::runtime_error("Invalid format");
+            throw std::runtime_error("Invalid format of "+filename+". (Do lines have ID and are they TAB-separated?)");
         }
     }
 

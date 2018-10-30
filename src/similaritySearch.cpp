@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
     metric = dr.metric;
     std::cout << "Done reading input dataset (" << X->size() << "x" << dr.vectorDim <<")" <<std::endl;
 
+
     QuerysetReader qr(Params::query_file);
     Y = qr.readOrderedDataset();
     R = qr.R;
@@ -68,6 +69,7 @@ int main(int argc, char *argv[]) {
 
     std::ofstream fout;
     fout.open(Params::output_file);
+
 
 #ifdef RUN_LSH
     AbstractSimilaritySearch *LSH;
@@ -113,7 +115,6 @@ int main(int argc, char *argv[]) {
 
 
 void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, OrderedDataset& Y, double R, supported_metrics metric, std::string name, std::ofstream &output){
-    NDVector                                  q;
     int                                       N;
     std::set<std::string>                     possibleNeighborIds;
     std::vector<std::string>                  neighborIds;
@@ -130,6 +131,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Ord
     std::chrono::steady_clock::time_point     end;
 
     double                                    sumApproxRatio = 0;
+    int                                       sumPointsSearched = 0;
     int n_found = 0;
     int n_searched = 0;
     std::string maxRatioId;
@@ -147,17 +149,17 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Ord
 
     int i=0;
 
-    for (auto item : Y){
-        i++;
+    for (auto &item : Y){
+        i++;                                                                 // a useful counter for debugging
 
         begin = std::chrono::steady_clock::now();
 
-        NDVector q = item.second;
+        NDVector &q = item.second;
 
         possibleNeighborIds = searchStructure->retrieveNeighbors(q);
 
         possibleNeighbors.clear();
-        for (auto id : possibleNeighborIds) possibleNeighbors[id] =  X[id] ;
+        for (auto &id : possibleNeighborIds) possibleNeighbors[id] =  X[id] ;
 
         lshNN            = nearestNeighbor(q, possibleNeighbors, distance);
 
@@ -185,6 +187,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Ord
             maxApproxRatio = nan("");
         }
         n_searched++;
+        sumPointsSearched += possibleNeighborIds.size();
 
         if (lshNN.first == trueNN.first) n_found ++;
 
@@ -208,6 +211,7 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Ord
     std::cout << "-Mean approximation ratio: " << sumApproxRatio / n_searched << std::endl;
     std::cout << "-Mean approximate Nearest Neighbor time: " << (sumApproxTime / i) << " (ms)" << std::endl;
     std::cout << "-Mean actual Nearest Neighbor time: " << (sumDistanceTime / i) << " (ms)" << std::endl;
+    std::cout << "-Mean number of vectors searched exhaustively per query: " << (sumPointsSearched / (float)i) << std::endl;
     std::cout << "-Number of true Nearest Neighbors found: " << n_found << std::endl;
 }
 
