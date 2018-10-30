@@ -18,12 +18,15 @@ unsigned long NDVector::dim() const{
 }
 
 double NDVector::norm(unsigned long p) const{
-    std::vector<double> xs = std::vector<double>(this->dim());
 
-    std::transform(this->coords.begin(), this->coords.end(), xs.begin(),
-                   [=](double x) -> double {return pow(x,p);} );
+    double sum = 0;
+    for (auto x: this->coords){
+        sum += pow(x,p);
+    }
 
-    return pow(std::accumulate(xs.begin(), xs.end(), (double)0), (double)1/p);
+    double rootPower = (1.0/p);
+    double n = pow(sum, rootPower);
+    return n;
 }
 
 
@@ -31,10 +34,17 @@ double NDVector::dot(const NDVector& rhs)const{
     if (this->coords.empty()) throw std::range_error("Unitialized Vector Exception");
     if (rhs.dim() != this->dim() ) throw std::logic_error("Nonsensical dot product of vectors of different dimensions");
 
+    double prev = 0;
 
     double p = 0;
     for (int i=0; i<this->dim(); i++){
-        p += (*this)[i] * rhs[i];
+        double factor = (*this)[i] * rhs[i];
+        p += factor;
+
+        if ((factor > 0 && p < prev) || (factor < 0 && p > prev)){
+            throw std::range_error("double overflow while computing dot product");
+        }
+        prev = p;
     }
     return p;
 

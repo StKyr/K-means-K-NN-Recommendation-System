@@ -6,14 +6,14 @@
 
 TEST(testEuclideanLSH, initialize){
 
-        EuclideanSpaceLSH lsh (5,20, 65536, 3, 3, 4);
+        EuclideanSpaceLSH lsh (5,20, 3, 3, 4);
 }
 
 
 TEST(testEuclideanLSH, insert_single_vector){
 
 
-    EuclideanSpaceLSH lsh (1,5, 65536, 3, 2, 4);
+    EuclideanSpaceLSH lsh (1,5, 3, 2, 4);
     NDVector v = {1, 2};
     lsh.insertVector(v, "v1");
 }
@@ -29,7 +29,7 @@ TEST(testEuclideanLSH, g_values_digits){
 
     int k = 5;
     int L = 1;
-    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+    EuclideanSpaceLSH lsh (L,10, k, 3, 5);
 
 
     for (int i=0; i<100; i++) {
@@ -51,7 +51,7 @@ TEST(testEuclideanLSH, g_values_digits){
 TEST(testEuclideanLSH, g_values_exact){
     int k = 5;
     int L = 1;
-    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+    EuclideanSpaceLSH lsh (L,10, k, 3, 5);
 
     NDVector v1 = {1,2,3};
     NDVector v2 = {1,2,3};
@@ -62,7 +62,7 @@ TEST(testEuclideanLSH, g_values_exact){
 TEST(testEuclideanLSH, g_values_nearby){
     int k = 5;
     int L = 1;
-    EuclideanSpaceLSH lsh (L,10, 65536, k, 3, 5);
+    EuclideanSpaceLSH lsh (L,10, k, 3, 5);
 
     NDVector v1 = {1,2,3};
     NDVector v2 = {1.01,2.02,3.03};
@@ -79,7 +79,7 @@ TEST(testEuclideanLSH, insert_multiple_vectors){
 
 #define DEBUG
 
-    EuclideanSpaceLSH lsh (1,10, 65536, 5, 3, 5);
+    EuclideanSpaceLSH lsh (1,10, 5, 3, 5);
 
     lsh.insertVector(NDVector({1, 2, 3}), "v1");
     lsh.insertVector(NDVector({1.1, 2.1, 3.1}), "v2");
@@ -93,7 +93,7 @@ TEST(testEuclideanLSH, insert_multiple_vectors){
 TEST(testEuclideanLSH, insert_dataset){
 
 
-    EuclideanSpaceLSH lsh (1,10, 65536, 5, 3, 5);
+    EuclideanSpaceLSH lsh (1,10, 5, 3, 5);
 
 
     std::unordered_map<std::string, NDVector> map;
@@ -115,7 +115,7 @@ TEST(testEuclideanLSH, insert_dataset){
 TEST(testEuclideanLSH, retrieve_trivial_1){
 
 
-    EuclideanSpaceLSH lsh (2,5, 65536, 3, 2, 4);
+    EuclideanSpaceLSH lsh (2,5, 3, 2, 4);
     NDVector v = {1, 2};
     lsh.insertVector(v, "v1");
 
@@ -128,7 +128,7 @@ TEST(testEuclideanLSH, retrieve_trivial_1){
 
 TEST(testEuclideanLSH, retrieve_existing){
 
-    EuclideanSpaceLSH lsh (2,10, 65536, 5, 3, 5);
+    EuclideanSpaceLSH lsh (2,10, 5, 3, 5);
 
 
     std::unordered_map<std::string, NDVector> map;
@@ -192,28 +192,28 @@ TEST(testEuclideanLSH, retrieve_batches){
 
 
 TEST(testhFunction, initialization){
-    hFunction h(10,10);
+    hEucl h(10,10);
 }
 
 
 TEST(testhFunction, check_t_randomness){
-    hFunction h1(10,3);
-    hFunction h2(10,3);
+    hEucl h1(10,3);
+    hEucl h2(10,3);
 
     if (h1.t == h2.t) FAIL() << "Two h functions with the same t. NOTE: This test is probabilistic. Sometimes they get to have the same random values! (with probability 1/w) ";
 }
 
 TEST(testhFunction, check_equal_t){
-    hFunction h1(1,3);
-    hFunction h2(1,3);
+    hEucl h1(1,3);
+    hEucl h2(1,3);
 
     EXPECT_EQ(h1.t, h2.t);
 }
 
 
 TEST(testhFunction, check_v_randomness){
-    hFunction h1(5,3);
-    hFunction h2(5,3);
+    hEucl h1(5,3);
+    hEucl h2(5,3);
 
     if (h1.v == h2.v) FAIL() << "Two h functions with the same vectors. NOTE: This test is probabilistic, although very very unlikely to fail...";
 }
@@ -262,16 +262,28 @@ TEST(testHT, initialization){
 TEST(testHT, single_element){
     HashTable ht(5);
 
-    ht.insert(3, make_a_Bucket(542, "s1"));
+    Bucket bucket;
+    bucket.g_key = 542;
+    bucket.VectorId = "s1";
+
+    ht.insert(3, bucket);
 
     std::vector<std::string> result = ht.getVectorIds(3,542);
 
     EXPECT_EQ(result.size(),1);
     EXPECT_EQ(result[0], "s1");
 }
+Bucket make_a_Bucket(int g, std::string Vid){
+    Bucket bucket;
+    bucket.g_key = g;
+    bucket.VectorId =  Vid;
+    return bucket;
+}
 
 
 TEST(testHT, single_list){
+
+
 
     HashTable ht(5);
 

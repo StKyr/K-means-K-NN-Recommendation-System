@@ -23,32 +23,39 @@ std::pair<std::string, std::vector<double>> VectorTSVReader::parseNextLine(){
             if (getline(this->inputFile, line)) {   // get a whole line
 
                 std::stringstream ss(line);
-                getline(ss, part, '\t');
+                getline(ss, part, delimiter);
 
                 vectorId = part;
 
-                while (getline(ss, part, '\t')) {
-                    std::stringstream xstream(part);
-                    xstream >> x;
-                    v.push_back(x);
+                try {
+                    while (getline(ss, part, delimiter)) {
+                        x = stod(part);
+                        v.push_back(x);
+                    }
+
+                }catch (std::exception &e){ // possible '\r' character before new line
+                    if (part != "\r"){
+                        throw e;
+                    }
                 }
             }
 
         }catch(std::exception& e) {
-            throw std::runtime_error("Invalid format");
+            throw std::runtime_error("Invalid format of "+filename+". (Do lines have ID and are they TAB-separated?)");
         }
     }
 
     return std::make_pair(vectorId, v);
 }
 
-Dataset VectorTSVReader::readDataset() {
+Dataset* VectorTSVReader::readDataset() {
 
     this->inputFile.open(this->filename, std::ios::in);
 
     parseFirstLine();
 
-    Dataset dataset;
+    Dataset* dataset = new std::unordered_map<std::string, NDVector>();
+
     std::pair<std::string, std::vector<double>> nextVector;
 
     nextVector = parseNextLine();
@@ -62,7 +69,7 @@ Dataset VectorTSVReader::readDataset() {
 
         if (v.dim() != this->vectorDim) throw std::runtime_error("\""+filename+"\" dataset contains vector of varying dimensions.");
 
-        dataset[nextVector.first] = v;
+        (*dataset)[nextVector.first] = v;
 
         nextVector = parseNextLine();
     }
@@ -70,6 +77,37 @@ Dataset VectorTSVReader::readDataset() {
     this->inputFile.close();
     return dataset;
 }
+
+OrderedDataset* VectorTSVReader::readOrderedDataset() {
+
+    this->inputFile.open(this->filename, std::ios::in);
+
+    parseFirstLine();
+
+    OrderedDataset* dataset = new std::map<std::string, NDVector>();
+
+    std::pair<std::string, std::vector<double>> nextVector;
+
+    nextVector = parseNextLine();
+
+
+    while(!nextVector.first.empty()){
+
+        NDVector v(nextVector.second);
+
+        if (! this->vectorDim) this->vectorDim = (int)v.dim();
+
+        if (v.dim() != this->vectorDim) throw std::runtime_error("\""+filename+"\" dataset contains vector of varying dimensions.");
+
+        (*dataset)[nextVector.first] = v;
+
+        nextVector = parseNextLine();
+    }
+
+    this->inputFile.close();
+    return dataset;
+}
+
 
 void DatasetReader::parseFirstLine() {
     std::string line;
@@ -119,14 +157,10 @@ void QuerysetReader::parseFirstLine(){
 
     if (this->inputFile.is_open()) {
 
-        if (!getline(this->inputFile, part)) {                                      // get first line of file
-            throw std::runtime_error("File \""+this->filename+"\" is empty");
-        }
-
         try {
 
             getline(inputFile, part, ' ');
-            if (ltrim(part) != "Radius:") throw std::runtime_error("Invalid first line of query set");
+            if (ltrim(part) != "Radius:") throw std::runtime_error("Invalid first line of file \""+this->filename+"\".");
 
             getline(inputFile, part);
             this->R = stod(ltrim(part));
