@@ -16,7 +16,7 @@ std::vector<NDVector> KMeansUpdate::operator() (std::vector<NDVector>& X, std::v
     for (int i=0; i<X.size(); i++){
         NDVector x = X[i];
         int cluster = assignment[i];
-        representatives[cluster] += x;
+        representatives[cluster] += x;    //TODO: check for overflow
         points_per_cluster[cluster]++;
     }
 
