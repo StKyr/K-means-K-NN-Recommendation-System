@@ -16,7 +16,6 @@ void similaritySearch(AbstractSimilaritySearch *searchStructure, Dataset& X, Ord
 
 
 namespace HyperParams {
-    int M = 4;
     int w = 4;
 }
 
