@@ -18,7 +18,7 @@ public:
 
 
 std::vector<std::tuple<NDVector, long>>
-k_means_clustering(std::vector<NDVector>& X, int k, k_means_params& params, double (*dist)(NDVector&,NDVector&))
+k_means_clustering(std::vector<NDVector>& X, int k, k_means_params& params)
 {
 	std::vector<int>      assignment;
 	std::vector<NDVector> old_representatives;
@@ -29,8 +29,8 @@ k_means_clustering(std::vector<NDVector>& X, int k, k_means_params& params, doub
 
 		old_representatives = representatives;
 
-		assignment      = params.assign(X, representatives, dist);
-		representatives = params.update(X, assignment)
+		assignment      = params.assign(X, representatives);
+		representatives = params.update(X, assignment, k);
 
 	} while (representatives != old_representatives);
 

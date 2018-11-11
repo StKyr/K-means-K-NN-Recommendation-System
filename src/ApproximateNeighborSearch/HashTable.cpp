@@ -1,5 +1,5 @@
 #include <stdexcept>
-#include "AproximateNeighborSearch/HashTable.h"
+#include <ApproximateNeighborSearch/HashTable.h>
 
 
 HashTable::HashTable(int size)
