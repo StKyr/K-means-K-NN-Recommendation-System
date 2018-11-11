@@ -23,17 +23,17 @@ public:
 };
 
 
-class LSHAssignment : public Assignment {
+class ReverseANNAssignment : public Assignment {
 public:
-    LSHAssignment(LSH& searchIndex, double (*dist)(NDVector&, NDVector&))
-        : Assignment(dist), lsh(searchIndex){}
+    ReverseANNAssignment(AbstractSimilaritySearch& searchIndex, double (*dist)(NDVector&, NDVector&))
+        : Assignment(dist), searchIndex(searchIndex){}
 
     std::vector<int> operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives);
 
 
 private:
     //std::map<std::string, NDVector>& index;
-    LSH& lsh;
+    AbstractSimilaritySearch& searchIndex;
 };
 
 

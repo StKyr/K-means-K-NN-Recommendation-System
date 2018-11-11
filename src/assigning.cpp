@@ -36,7 +36,7 @@ std::vector<int> LloydAssignment::operator() (std::map<std::string, NDVector>& X
 
 
 
-std::vector<int> LSHAssignment::operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives){
+std::vector<int> ReverseANNAssignment::operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives){
 
     /*
      * Business Logic:
@@ -59,8 +59,8 @@ std::vector<int> LSHAssignment::operator() (std::map<std::string, NDVector>& X, 
      *   centre, we compare it to the saved distance and we again store the minimum combination.
      *
      * 5. We are now ready to assign points to clusters: For every point x in X,
-     *    a) if x exists in our dictionary, we assign to currently stored cluster
-     *    b) otherwise, we exhaustively compute distances to all centres and assign to argmin.
+     *   a) if x exists in our dictionary, we assign to currently stored cluster
+     *   b) otherwise, we exhaustively compute distances to all centres and assign to argmin.
      */
 
     typedef std::pair<int, double> NearestCenterInfo;
@@ -70,7 +70,7 @@ std::vector<int> LSHAssignment::operator() (std::map<std::string, NDVector>& X, 
 
     for (int i=0; i<k; i++){                                                                                            // 2.
 
-        std::set<std::string> nearby_points_to_centre = lsh.retrieveNeighbors(representatives[i]);                      // 3.
+        std::set<std::string> nearby_points_to_centre = this-> searchIndex.retrieveNeighbors(representatives[i]);       // 3.
         for (auto &vectorId : nearby_points_to_centre){                                                                 // 4.
 
             if (nearestCenters.find(vectorId) != nearestCenters.end()){                                                 // 4a.
