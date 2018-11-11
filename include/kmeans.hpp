@@ -18,7 +18,7 @@ public:
 
 
 std::vector<std::tuple<NDVector, long>>
-k_means_clustering(std::vector<NDVector>& X, int k, k_means_params& params)
+k_means_clustering(std::map<std::string, NDVector>& X, int k, k_means_params& params)
 {
 	std::vector<int>      assignment;
 	std::vector<NDVector> old_representatives;

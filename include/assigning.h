@@ -4,11 +4,12 @@
 #include <vector>
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <ApproximateNeighborSearch/similaritySearch.h>
+#include <map>
 
 class Assignment {
 public:
     explicit Assignment(double (*dist)(NDVector&,NDVector&)):dist(dist){}
-    virtual std::vector<int> operator() (std::vector<NDVector>& X,std::vector<NDVector> representatives) = 0;
+    virtual std::vector<int> operator() (std::map<std::string, NDVector>& X,std::vector<NDVector> representatives) = 0;
 
 protected:
     double (*dist)(NDVector&,NDVector&);
@@ -16,19 +17,22 @@ protected:
 
 class LloydAssignment: public Assignment{
 public:
-    LloydAssignment(double (*dist)(NDVector&,NDVector&)) :Assignment(dist){}
-    std::vector<int> operator() (std::vector<NDVector>& X,std::vector<NDVector> representatives) override;
+    explicit LloydAssignment(double (*dist)(NDVector&,NDVector&)) :Assignment(dist){}
+    std::vector<int> operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives) override;
 
 };
 
 
 class LSHAssignment : public Assignment {
 public:
-    LSHAssignment(LSH& searchIndex, double (*dist)(NDVector&, NDVector&)) : Assignment(dist), lsh(searchIndex) {}
-    std::vector<int> operator() (std::vector<NDVector>& X,std::vector<NDVector> representatives);
+    LSHAssignment(LSH& searchIndex, double (*dist)(NDVector&, NDVector&))
+        : Assignment(dist), lsh(searchIndex){}
+
+    std::vector<int> operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives);
 
 
 private:
+    //std::map<std::string, NDVector>& index;
     LSH& lsh;
 };
 

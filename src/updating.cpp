@@ -1,6 +1,6 @@
 #include "updating.h"
 
-std::vector<NDVector> KMeansUpdate::operator() (std::vector<NDVector>& X, std::vector<int> assignment, int k){
+std::vector<NDVector> KMeansUpdate::operator() (std::map<std::string, NDVector>& X, std::vector<int> assignment, int k){
 
     std::vector<NDVector> representatives;
     std::vector<int> points_per_cluster;
@@ -8,16 +8,17 @@ std::vector<NDVector> KMeansUpdate::operator() (std::vector<NDVector>& X, std::v
     points_per_cluster.reserve(k);
 
     for (int i=0; i<k; i++) {
-        representatives.emplace_back(NDVector::zero_vector(X[0].dim()));
+        representatives.emplace_back(NDVector::zero_vector(dim);
         points_per_cluster.push_back(0);
     }
 
-
-    for (int i=0; i<X.size(); i++){
-        NDVector x = X[i];
+    int i=0;
+    for (auto &item: X){
+        NDVector &x = item.second;
         int cluster = assignment[i];
         representatives[cluster] += x;    //TODO: check for overflow
         points_per_cluster[cluster]++;
+        i++;
     }
 
     for (int i=0; i<k; i++) representatives[i] *= (1.0/points_per_cluster[i]);
@@ -27,20 +28,21 @@ std::vector<NDVector> KMeansUpdate::operator() (std::vector<NDVector>& X, std::v
 
 
 
-std::vector<std::vector<NDVector&>> points_per_cluster(std::vector<NDVector>& X, std::vector<int> assignment, int k){
+std::vector<std::vector<NDVector&>> points_per_cluster(std::map<std::string, NDVector>& X, std::vector<int> assignment, int k){
 
     std::vector<std::vector<NDVector&>> filtered;
     filtered.reserve(k);
     for (int i=0; i<k; i++){
         filtered.emplace_back(std::vector<NDVector&>());
         long num_cluster_points = std::count(assignment.begin(), assignment.end(), assignment[i]);
-        filtered[i].reserve(num_cluster_points);
+        filtered[i].reserve((unsigned)num_cluster_points); //todo: check this
     }
 
     int i=0;
     for (auto& x: X){
         int index = assignment[i];
-        filtered[index].push_back(x);
+        filtered[index].push_back(x.second);
+        i++;
     }
 
     return filtered;
@@ -49,7 +51,7 @@ std::vector<std::vector<NDVector&>> points_per_cluster(std::vector<NDVector>& X,
 
 
 
-std::vector<NDVector> PAMalaLloydUpdate::operator() (std::vector<NDVector>& X, std::vector<int> assignment, int k) {
+std::vector<NDVector> PAMalaLloydUpdate::operator() (std::map<std::string, NDVector>& X, std::vector<int> assignment, int k) {
 
     std::vector<NDVector> representatives;
     std::vector<double> min_medoid_J;
