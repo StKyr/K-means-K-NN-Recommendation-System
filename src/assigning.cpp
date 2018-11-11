@@ -41,19 +41,6 @@ double min_distance_between_centers(std::vector<NDVector>& centres, double(*dist
 
 std::vector<int> LSHAssignment::operator() (std::vector<NDVector>& X, std::vector<NDVector> representatives){
 
-    int k = representatives.size();
-    std::vector<int> assignment;
-    assignment.reserve(X.size());
-    for (int i=0; i<X.size(); i++) assignment.push_back(-1);
-
-    double R = min_distance_between_centers(representatives, this->dist) / 2;
-    while (range_queries_find_unassigned_points){
-
-
-
-
-        R *= 2;
-    }
 
 
 }
