@@ -23,7 +23,7 @@ k_means_clustering(std::map<std::string, NDVector>& X, int k, k_means_params& pa
 	std::vector<int>      assignment;
 	std::vector<NDVector> old_representatives;
 
-	std::vector<NDVector> representatives = params.initialize(k,(int)X[0].dim());
+	std::vector<NDVector> representatives = params.initialize(X, k,(int)X[0].dim());
 	
 	do {
 
