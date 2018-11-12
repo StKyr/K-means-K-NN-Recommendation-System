@@ -43,8 +43,8 @@ std::vector<int> ReverseANNAssignment::operator() (std::map<std::string, NDVecto
      *
      * We will implement a strategy that postpones computing any distances until a point is found to be "nearby" more
      * than one centroid. The algorithm works in linear time and ensures that 1) each centroid-point distance is
-     * computed at most once and 2) points that are sufficiently close to a single centroid don't have their distances
-     * (to any centred) computed. The space overhead is just a hash table for storing info on retrieved points.
+     * computed at most once and 2) points that are "sufficiently" close to a single centroid don't have their distances
+     * (to any center) computed. The space overhead is just a hash table for storing info on retrieved points.
      *
      * 1. We will hold a single dictionary structure for each retrieved point, where info will be stored about (current)
      * nearest center and its distance.
@@ -52,7 +52,7 @@ std::vector<int> ReverseANNAssignment::operator() (std::map<std::string, NDVecto
      *  3. We will first retrieve all its "nearby" using LSH.
      *  4. Then, we examine each of its retrieved points:
      *   a) If that point is not previously stored in the dictionary (i.e. no conflicts so far), we store centre's Id
-     *     and -1 as distance.
+     *     and -1 as distance. (no distance computation here)
      *   b) If that point exists in the dictionary and distance is -1, we calculate its distance from the stored centred
      *   and its distance from the current centre and we store the centre-distance combination of the minimum distance.
      *   c) If the point exists in the dictionary and current distance is != -1, then we compute the distance to current
