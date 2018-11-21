@@ -39,7 +39,7 @@ public:
 
     const double  operator [] (int i)                              const;
   //std::ostream& operator << (std::ostream& os, NDVector& rhs);   // Non class member function - see below
-
+    std::string   toString    ()                                   const;
 
     static NDVector random_vector(int dimension);
     static NDVector zero_vector(int dimension);

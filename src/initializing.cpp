@@ -2,20 +2,19 @@
 #include <limits>
 #include <random>
 
-std::vector<NDVector> RandomInitializer::operator () (std::map<std::string, NDVector>& X, int k, int l){
+std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k, int l){
 
     std::uniform_int_distribution<int> unif(0, (int)X.size());
     std::default_random_engine re;
 
+    std::vector<Cluster> clusters;
+    clusters.reserve(k);
 
-    std::vector<NDVector> representatives;
-    representatives.reserve(k);
     for (int i=0; i<k; i++){
-        auto it = X.begin();
-        std::advance(it, unif(re));
-        representatives.emplace_back((*it).second);
+        auto it = X.begin();std::advance(it, unif(re));
+        clusters.emplace_back(Cluster((*it).second));
     }
-    return representatives;
+    return clusters;
 }
 
 
@@ -63,8 +62,9 @@ std::string select_random_centroid(std::vector<std::pair<std::string&, double>> 
 }
 
 
-std::vector<NDVector> KMeansPlusPlus::operator()(std::map<std::string, NDVector>& X, int k, int l) {
+std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k, int l) {
 
+    std::vector<Cluster> clusters;
 
     std::vector<NDVector> initial_centers;
     initial_centers.reserve(k);
@@ -96,7 +96,10 @@ std::vector<NDVector> KMeansPlusPlus::operator()(std::map<std::string, NDVector>
 
         std::string new_centroid_id = select_random_centroid(all_distances, min_distance);
         initial_centers.push_back(X[new_centroid_id]);
+
+
+        clusters.emplace_back(Cluster(X[new_centroid_id]));
     }
 
-    return initial_centers;
+    return clusters;
 }

@@ -16,11 +16,11 @@ add_executable(ergasia2
         include/ApproximateNeighborSearch/NDVector.h
         include/ApproximateNeighborSearch/NearestNeighborSearch.h
         include/ApproximateNeighborSearch/similaritySearch.h
-        include/ApproximateNeighborSearch/VectorTSVReader.h
+        include/ApproximateNeighborSearch/VectorCSVReader.h
         src/ApproximateNeighborSearch/CosineSimilarityLSH.cpp
         src/ApproximateNeighborSearch/EuclideanSpaceLSH.cpp
         src/ApproximateNeighborSearch/HashTable.cpp
         src/ApproximateNeighborSearch/HypercubeProjection.cpp
         src/ApproximateNeighborSearch/metrics.cpp
         src/ApproximateNeighborSearch/NDVector.cpp
-        src/ApproximateNeighborSearch/NearestNeighborSearch.cpp include/initializing.h src/initializing.cpp src/assigning.cpp include/assigning.h src/updating.cpp include/updating.h src/Silhouette.cpp include/Silhouette.h)
+        src/ApproximateNeighborSearch/NearestNeighborSearch.cpp include/initializing.h src/initializing.cpp src/assigning.cpp include/assigning.h src/updating.cpp include/updating.h src/Silhouette.cpp include/Silhouette.h  src/DistancesIndex.h src/ApproximateNeighborSearch/VectorCSVReader.cpp src/clustering.cpp src/kmeans.cpp)

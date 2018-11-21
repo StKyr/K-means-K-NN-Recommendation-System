@@ -1,6 +1,16 @@
 #include "updating.h"
 
-std::vector<NDVector> KMeansUpdate::operator() (std::map<std::string, NDVector>& X, std::vector<int> assignment, int k){
+std::vector<NDVector> KMeansUpdate::operator() (Dataset& X, std::vector<Cluster>& clusters){
+
+    int k = clusters.size();
+
+
+    for (auto &C : clusters){
+        NDVector new_centroid = NDVector::zero_vector(dim);
+        for (auto &p: C.get_points()) new_centroid += p;
+        new_centroid *= (1.0 / C.num_points());
+        C.update_centroid(new_centroid);
+    }
 
     std::vector<NDVector> representatives;
     std::vector<int> points_per_cluster;
@@ -8,7 +18,7 @@ std::vector<NDVector> KMeansUpdate::operator() (std::map<std::string, NDVector>&
     points_per_cluster.reserve(k);
 
     for (int i=0; i<k; i++) {
-        representatives.emplace_back(NDVector::zero_vector(dim);
+        representatives.emplace_back(NDVector::zero_vector(dim));
         points_per_cluster.push_back(0);
     }
 
@@ -28,7 +38,7 @@ std::vector<NDVector> KMeansUpdate::operator() (std::map<std::string, NDVector>&
 
 
 
-std::vector<std::vector<NDVector&>> points_per_cluster(std::map<std::string, NDVector>& X, std::vector<int> assignment, int k){
+std::vector<std::vector<NDVector&>> points_per_cluster(Dataset& X, std::vector<Cluster>& clusters){
 
     std::vector<std::vector<NDVector&>> filtered;
     filtered.reserve(k);
@@ -51,7 +61,7 @@ std::vector<std::vector<NDVector&>> points_per_cluster(std::map<std::string, NDV
 
 
 
-std::vector<NDVector> PAMalaLloydUpdate::operator() (std::map<std::string, NDVector>& X, std::vector<int> assignment, int k) {
+std::vector<NDVector> PAMalaLloydUpdate::operator() (std::unordered_map<std::string, NDVector>& X, std::vector<int> assignment, int k) {
 
     std::vector<NDVector> representatives;
     std::vector<double> min_medoid_J;

@@ -8,7 +8,7 @@ double average_distance(NDVector& p, std::vector<NDVector&> objects, double (*di
     return d / objects.size();
 }
 
-SilhouetteResults compute_silhouettes(std::map<std::string, NDVector>& X, std::vector<int> assignment, std::vector<NDVector> centers, double (*dist)(NDVector&, NDVector&)){
+SilhouetteResults compute_silhouettes(std::unordered_map<std::string, NDVector>& X, std::vector<int> assignment, std::vector<NDVector> centers, double (*dist)(NDVector&, NDVector&)){
     int k = (int)centers.size();
 
     SilhouetteResults results;

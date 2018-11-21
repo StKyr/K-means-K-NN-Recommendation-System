@@ -3,7 +3,6 @@
 
 
 #include <string>
-#include <AproximateNeighborSearch/NDVector.h>
 #include <fstream>
 #include <unordered_map>
 #include <map>
@@ -13,13 +12,13 @@
 typedef std::unordered_map<std::string, NDVector> Dataset;
 typedef std::map<std::string, NDVector> OrderedDataset;
 
-class VectorTSVReader {
+class VectorCSVReader {
 public:
 
-    explicit        VectorTSVReader   (std::string& flename, char delimiter='\t') :filename(flename), vectorDim(0), delimiter(delimiter) {}
+    explicit        VectorCSVReader   (std::string& flename, char delimiter=',') :filename(flename), vectorDim(0), delimiter(delimiter) {}
     Dataset*        readDataset       ();
     OrderedDataset* readOrderedDataset();
-                    ~VectorTSVReader  ()                    {if (this->inputFile.is_open()) this->inputFile.close();}
+                    ~VectorCSVReader  ()                    {if (this->inputFile.is_open()) this->inputFile.close();}
 
     int vectorDim;
 
@@ -35,10 +34,10 @@ protected:
 };
 
 
-class DatasetReader : public VectorTSVReader{
+class DatasetReader : public VectorCSVReader{
 public:
 
-    explicit         DatasetReader(std::string filename) :VectorTSVReader(filename), metric(_NULL) {}
+    explicit         DatasetReader(std::string filename) :VectorCSVReader(filename), metric(_NULL) {}
 
 
 
@@ -48,24 +47,6 @@ public:
 private:
     void parseFirstLine() override;
 };
-
-
-
-
-class QuerysetReader :public VectorTSVReader {
-
-public:
-    explicit         QuerysetReader(std::string filename) :VectorTSVReader(filename), R(-1) {}
-
-    // member
-    double R;
-
-private:
-
-    void parseFirstLine() override;
-};
-
-
 
 
 

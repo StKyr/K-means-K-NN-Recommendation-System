@@ -3,6 +3,7 @@
 
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <map>
+#include <unordered_map>
 
 class SilhouetteResults{
 public:
@@ -13,6 +14,6 @@ public:
 
 
 
-SilhouetteResults compute_silhouettes(std::map<std::string, NDVector>& X, std::vector<int> assignment, std::vector<NDVector> centers, double (*dist)(NDVector&, NDVector&));
+SilhouetteResults compute_silhouettes(std::unordered_map<std::string, NDVector>& X, std::vector<int> assignment, std::vector<NDVector> centers, double (*dist)(NDVector&, NDVector&));
 
 #endif //ERGASIA2_SILHOUETTE_H

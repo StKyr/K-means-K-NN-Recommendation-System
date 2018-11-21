@@ -20,7 +20,7 @@ int single_assignment(NDVector& x, std::vector<NDVector>& representatives, doubl
 
 
 
-std::vector<int> LloydAssignment::operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives){
+std::vector<int> LloydAssignment::operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives){
 
     std::vector<int> assignment;
     assignment.reserve(X.size());
@@ -36,7 +36,7 @@ std::vector<int> LloydAssignment::operator() (std::map<std::string, NDVector>& X
 
 
 
-std::vector<int> ReverseANNAssignment::operator() (std::map<std::string, NDVector>& X, std::vector<NDVector> representatives){
+std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives){
 
     /*
      * Business Logic:

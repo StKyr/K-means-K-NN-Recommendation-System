@@ -170,3 +170,10 @@ NDVector NDVector::zero_vector(int dimension){
 }
 
 
+std::string NDVector::toString() const{
+    std::stringstream ss("{");
+    for (int i=0; i<dim()-1; i++) ss << coords[i] <<",";
+    ss  <<coords.back()<< "}";
+    return ss.str();
+}
+
