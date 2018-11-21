@@ -1,5 +1,6 @@
 #include "assigning.h"
 
+//TODO: Fuckin understand references
 
 int single_assignment(NDVector& x, std::vector<NDVector>& representatives, double (*dist)(NDVector&, NDVector&)){
     unsigned long k = representatives.size();
@@ -20,23 +21,32 @@ int single_assignment(NDVector& x, std::vector<NDVector>& representatives, doubl
 
 
 
-std::vector<int> LloydAssignment::operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives){
+void LloydAssignment::operator() (Dataset& X, std::vector<Cluster>& clusters){
 
-    std::vector<int> assignment;
-    assignment.reserve(X.size());
 
-    for (auto& x: X){
-        int closest_cluster_index = single_assignment(x.second, representatives, dist);
-        assignment.push_back(closest_cluster_index);
+    int k = clusters.size();
+    std::vector<NDVector> all_centres(k);
+
+    for (int i=0; i<k; i++){    // order not guaranteed in for each loop
+        auto &C = clusters[i];
+        C.clear_assignment();
+        all_centres.push_back(C.get_centroid());
     }
-    return assignment;
+
+    for (auto x: X){ //TODO: reimplement when X is changed
+
+        int closest_cluster_index = single_assignment(x.second, all_centres, dist);
+        auto& C = clusters[closest_cluster_index];
+        C.assign(x.second);
+    }
+
 }
 
 
 
 
 
-std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives){
+void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& clusters){
 
     /*
      * Business Logic:
@@ -49,7 +59,7 @@ std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::strin
      * 1. We will hold a single dictionary structure for each retrieved point, where info will be stored about (current)
      * nearest center and its distance.
      * 2. For each centroid:
-     *  3. We will first retrieve all its "nearby" using LSH.
+     *  3. We will first retrieve all its "nearby" points using LSH.
      *  4. Then, we examine each of its retrieved points:
      *   a) If that point is not previously stored in the dictionary (i.e. no conflicts so far), we store centre's Id
      *     and -1 as distance. (no distance computation here)
@@ -66,11 +76,11 @@ std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::strin
     typedef std::pair<int, double> NearestCenterInfo;
     std::unordered_map<std::string,NearestCenterInfo> nearestCenters;                                                   // 1.
 
-    auto k = representatives.size();
+    auto k = clusters.size();
 
     for (int i=0; i<k; i++){                                                                                            // 2.
 
-        std::set<std::string> nearby_points_to_centre = this-> searchIndex.retrieveNeighbors(representatives[i]);       // 3.
+        std::set<std::string> nearby_points_to_centre = this-> searchIndex.retrieveNeighbors(clusters[i].get_centroid());       // 3.
         for (auto &vectorId : nearby_points_to_centre){                                                                 // 4.
 
             if (nearestCenters.find(vectorId) != nearestCenters.end()){                                                 // 4a.
@@ -78,13 +88,13 @@ std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::strin
 
             }else {
                 NDVector &p = X[vectorId];
-                NDVector &c_curr = representatives[i];
+                NDVector &c_curr = clusters[i].get_centroid();
 
                 double dist_curr = this->dist(p, c_curr);
 
                 if (nearestCenters[vectorId].second == -1) {                                                            // 4b.
                     int i_prev = nearestCenters[vectorId].first;
-                    NDVector &c_prev = representatives[i_prev];
+                    NDVector &c_prev = clusters[i_prev].get_centroid();
                     double dist_prev = this->dist(p, c_prev);
 
                     if (dist_curr < dist_prev) nearestCenters[vectorId] = std::make_pair(i, dist_curr);
@@ -99,18 +109,25 @@ std::vector<int> ReverseANNAssignment::operator() (std::unordered_map<std::strin
         }
     }
 
-    std::vector<int> assigned_clusters;
-    assigned_clusters.reserve(X.size());
-    for (auto &x: X){                                                                                                   // 5.
+    std::vector<NDVector> all_centres(k);
 
-        if (nearestCenters.find(x.first) != nearestCenters.end()){                                                      // 5a.
-            assigned_clusters.push_back(nearestCenters[x.first].first);
-
-        }else{                                                                                                          // 5b.
-            int assigned_cluster = single_assignment(x.second, representatives, dist);
-            assigned_clusters.push_back(assigned_cluster);
-        }
+    for (int i=0; i<k; i++){    // order not guaranteed in for each loop
+        auto &C = clusters[i];
+        C.clear_assignment();
+        all_centres.push_back(C.get_centroid());
     }
 
-    return assigned_clusters;
+    for (auto &x: X){                                                                                                   // 5.
+        int cluster_index;
+
+        if (nearestCenters.find(x.first) != nearestCenters.end()){                                                      // 5a.
+            cluster_index = nearestCenters[x.first].first;
+
+        }else{                                                                                                          // 5b.
+            cluster_index = single_assignment(x.second, all_centres, dist);
+        }
+
+        Cluster& C = clusters[cluster_index];
+        C.assign(x.second);
+    }
 }

@@ -12,7 +12,7 @@
 class Update{
 public:
     explicit Update(double (*dist)(NDVector&, NDVector&)): dist(dist) {}
-    virtual std::vector<NDVector> operator ()(Dataset& X, std::vector<Cluster>& clusters) = 0;
+    virtual void operator ()(std::vector<Cluster>& clusters) = 0;
 
 protected:
     double (*dist)(NDVector&, NDVector&);
@@ -23,7 +23,7 @@ protected:
 class KMeansUpdate: public Update{
 public:
     explicit KMeansUpdate(int dim, double (*dist)(NDVector&, NDVector&)) : Update(dist), dim(dim) {}
-    std::vector<NDVector> operator()(Dataset& X, std::vector<Cluster>& clusters) override;
+    void operator()(std::vector<Cluster>& clusters) override;
 private:
     int dim;
 };
@@ -31,8 +31,7 @@ private:
 class PAMalaLloydUpdate :public Update{
 public:
     explicit PAMalaLloydUpdate(double (*dist)(NDVector&, NDVector&)): Update(dist) {}
-
-    std::vector<NDVector> operator()(Dataset& X, std::vector<Cluster>& clusters) override;
+    void operator()(std::vector<Cluster>& clusters) override;
 
 private:
 

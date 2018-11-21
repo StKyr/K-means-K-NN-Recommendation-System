@@ -29,9 +29,10 @@ int main(int argc, char *argv[]){
     Initializer *initializing_method = new RandomInitializer();
     Assignment  *assignment_method   = new LloydAssignment(distance);
     Update      *updating_method     = new KMeansUpdate(reader.vectorDim, distance);
-    KMeansParams k_means_params(*initializing_method, *assignment_method, *updating_method);
+    Criterion   *criterion           = new IteratorCounter(5);
+    KMeansParams k_means_params(*initializing_method, *assignment_method, *updating_method, *criterion);
 
-    clustering_results results = k_means_clustering(*X, Params::K, k_means_params, distance);
+    std::vector<Cluster> results = k_means_clustering(*X, Params::K, k_means_params, distance);
 
     delete X;
     delete (RandomInitializer*)initializing_method;

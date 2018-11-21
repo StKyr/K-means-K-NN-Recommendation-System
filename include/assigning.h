@@ -5,11 +5,13 @@
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <ApproximateNeighborSearch/similaritySearch.h>
 #include <map>
+#include <ApproximateNeighborSearch/VectorCSVReader.h>
+#include "kmeans.hpp"
 
 class Assignment {
 public:
     explicit Assignment(double (*dist)(NDVector&,NDVector&)):dist(dist){}
-    virtual std::vector<int> operator() (std::unordered_map<std::string, NDVector>& X,std::vector<NDVector> representatives) = 0;
+    virtual void operator() (Dataset& X, std::vector<Cluster>& clusters) = 0;
 
 protected:
     double (*dist)(NDVector&,NDVector&);
@@ -18,7 +20,7 @@ protected:
 class LloydAssignment: public Assignment{
 public:
     explicit LloydAssignment(double (*dist)(NDVector&,NDVector&)) :Assignment(dist){}
-    std::vector<int> operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives) override;
+    void operator() (Dataset& X, std::vector<Cluster>& clusters) override;
 
 };
 
@@ -28,7 +30,7 @@ public:
     ReverseANNAssignment(AbstractSimilaritySearch& searchIndex, double (*dist)(NDVector&, NDVector&))
         : Assignment(dist), searchIndex(searchIndex){}
 
-    std::vector<int> operator() (std::unordered_map<std::string, NDVector>& X, std::vector<NDVector> representatives);
+    void operator() (Dataset& X, std::vector<Cluster>& clusters) override;
 
 
 private:

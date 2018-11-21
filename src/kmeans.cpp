@@ -1,7 +1,7 @@
 #include "kmeans.hpp"
 
 
-clustering_results k_means_clustering(Dataset& X, int k, KMeansParams& params, double (*dist)(NDVector&,NDVector&))
+/*clustering_results k_means_clustering(Dataset& X, int k, KMeansParams& params, double (*dist)(NDVector&,NDVector&))
 {
     std::vector<int>      assignment;
     std::vector<NDVector> old_representatives;
@@ -43,23 +43,20 @@ std::vector<std::vector<std::string>> complete_assignment(clustering_results res
         classification[i].push_back(vectorId);
     }
     return classification;
-}
+}*/
 
 // ---------------------------------------------------------------------------------
 
 
 
 
-std::vector<Cluster> k_means_clustering(Dataset& X, int k, KMeansParams& params, double (*dist)(NDVector&,NDVector&))
-{
-
+std::vector<Cluster> k_means_clustering(Dataset& X, int k, KMeansParams& params, double (*dist)(NDVector&,NDVector&)) {
     std::vector<Cluster> clusters = params.initialize(X, k,(int)X[0].dim());
     do {
-        params.assign();
-        params.update();
+        params.assign(X, clusters);
+        params.update(clusters);
 
-    } while (! stopping_criterion.should_stop());
+    } while (!params.stopping_criterion.should_stop());
 
     return clusters;
-
 }
