@@ -1,5 +1,5 @@
 #include <iostream>
-#include "AproximateNeighborSearch/HypercubeProjection.h"
+#include <ApproximateNeighborSearch/HypercubeProjection.h>
 
 bool warningDisplayed = false;
 

@@ -2,7 +2,7 @@
 #include <limits>
 #include <random>
 
-std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k, int l){
+std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k){
 
     std::uniform_int_distribution<int> unif(0, (int)X.size());
     std::default_random_engine re;
@@ -38,7 +38,7 @@ int linear_probability_search(std::vector<double> arr, double x){
 }
 
 
-std::string select_random_centroid(std::vector<std::pair<std::string&, double>> distances, double D){
+std::string select_random_centroid(std::vector<std::pair<std::string, double>> distances, double D){
     for (int i=0; i<distances.size(); i++) distances[i] = std::make_pair(distances[i].first, distances[i].second / D);
 
     std::vector<double> P;
@@ -62,7 +62,7 @@ std::string select_random_centroid(std::vector<std::pair<std::string&, double>> 
 }
 
 
-std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k, int l) {
+std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k) {
 
     std::vector<Cluster> clusters;
 
@@ -78,7 +78,7 @@ std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k, int l) {
 
     for (int t=1; t<k; t++){
 
-        std::vector<std::pair<std::string&, double>> all_distances;
+        std::vector<std::pair<std::string, double>> all_distances;
         all_distances.reserve(X.size()-t+1);
         double min_distance = std::numeric_limits<double>::max();
 

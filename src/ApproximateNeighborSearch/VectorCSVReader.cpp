@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <sstream>
 #include <ApproximateNeighborSearch/VectorCSVReader.h>
-#include "VectorCSVReader.h"
-
 
 static inline std::string &ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),

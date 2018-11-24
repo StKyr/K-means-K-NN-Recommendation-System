@@ -1,7 +1,7 @@
-#include "AproximateNeighborSearch/NearestNeighborSearch.h"
 #include <list>
 #include <iostream>
 #include <csignal>
+#include <ApproximateNeighborSearch/NearestNeighborSearch.h>
 
 
 std::pair<std::string, double>  nearestNeighbor(NDVector& q, std::unordered_map<std::string, NDVector>& X, double (*dist)(NDVector&, NDVector&) ){

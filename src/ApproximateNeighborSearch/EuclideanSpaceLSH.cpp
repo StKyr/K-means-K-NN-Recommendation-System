@@ -1,11 +1,10 @@
 #include <utility>
 
-#include "AproximateNeighborSearch/EuclideanSpaceLSH.h"
 #include <random>
 #include <ctime>
 #include <cstdlib>
-
-
+#include <ApproximateNeighborSearch/NDVector.h>
+#include <ApproximateNeighborSearch/EuclideanSpaceLSH.h>
 
 hEucl::hEucl(int w, int d) :w(w) {
     std::random_device rd;

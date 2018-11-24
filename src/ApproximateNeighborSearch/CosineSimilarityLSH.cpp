@@ -1,8 +1,6 @@
 #include <random>
-#include "AproximateNeighborSearch/CosineSimilarityLSH.h"
-
-
-
+#include <ApproximateNeighborSearch/NDVector.h>
+#include <ApproximateNeighborSearch/CosineSimilarityLSH.h>
 
 hCos::hCos(int d) {
 

@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <ApproximateNeighborSearch/NDVector.h>
-#include <ApproximateNeighborSearch/similaritySearch.h>
-#include <map>
 #include <ApproximateNeighborSearch/VectorCSVReader.h>
-#include "kmeans.hpp"
+#include <ApproximateNeighborSearch/AbstractSimilaritySearch.h>
+#include "cluster.hpp"
+
 
 class Assignment {
 public:

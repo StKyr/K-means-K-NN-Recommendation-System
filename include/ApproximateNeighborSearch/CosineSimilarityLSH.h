@@ -3,11 +3,10 @@
 
 
 #include <vector>
-#include <AproximateNeighborSearch/NDVector.h>
 #include <unordered_map>
 #include <set>
-#include <AproximateNeighborSearch/similaritySearch.h>
 #include "HashTable.h"
+#include "similaritySearch.h"
 
 /**
  * h function for Cosine similarity LSH. Objects of this class can be called as functions. Property naming

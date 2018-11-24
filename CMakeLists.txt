@@ -23,4 +23,4 @@ add_executable(ergasia2
         src/ApproximateNeighborSearch/HypercubeProjection.cpp
         src/ApproximateNeighborSearch/metrics.cpp
         src/ApproximateNeighborSearch/NDVector.cpp
-        src/ApproximateNeighborSearch/NearestNeighborSearch.cpp include/initializing.h src/initializing.cpp src/assigning.cpp include/assigning.h src/updating.cpp include/updating.h src/Silhouette.cpp include/Silhouette.h include/DistancesIndex.h src/ApproximateNeighborSearch/VectorCSVReader.cpp src/clustering.cpp src/kmeans.cpp src/StoppingCriterion.cpp include/StoppingCriterion.h)
+        src/ApproximateNeighborSearch/NearestNeighborSearch.cpp include/initializing.h src/initializing.cpp src/assigning.cpp include/assigning.h src/updating.cpp include/updating.h src/Silhouette.cpp include/Silhouette.h include/DistancesIndex.h src/ApproximateNeighborSearch/VectorCSVReader.cpp src/clustering.cpp src/StoppingCriterion.cpp include/StoppingCriterion.h include/cluster.hpp)

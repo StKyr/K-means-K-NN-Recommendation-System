@@ -1,4 +1,5 @@
-#include "AproximateNeighborSearch/metrics.h"
+#include <ApproximateNeighborSearch/metrics.h>
+#include <ApproximateNeighborSearch/NDVector.h>
 
 double metrics::euclidean_distance(NDVector& v, NDVector& u){
     NDVector diff = v - u;

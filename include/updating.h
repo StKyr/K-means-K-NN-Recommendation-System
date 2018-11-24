@@ -3,16 +3,13 @@
 
 #include <vector>
 #include <ApproximateNeighborSearch/NDVector.h>
-#include <map>
-#include <unordered_map>
-#include <ApproximateNeighborSearch/VectorCSVReader.h>
-#include "kmeans.hpp"
+#include "cluster.hpp"
 
 
 class Update{
 public:
     explicit Update(double (*dist)(NDVector&, NDVector&)): dist(dist) {}
-    virtual void operator ()(std::vector<Cluster>& clusters) = 0;
+    virtual void operator ()(Dataset& X, std::vector<Cluster>& clusters) = 0;
 
 protected:
     double (*dist)(NDVector&, NDVector&);
@@ -23,7 +20,7 @@ protected:
 class KMeansUpdate: public Update{
 public:
     explicit KMeansUpdate(int dim, double (*dist)(NDVector&, NDVector&)) : Update(dist), dim(dim) {}
-    void operator()(std::vector<Cluster>& clusters) override;
+    void operator()(Dataset& X, std::vector<Cluster>& clusters) override;
 private:
     int dim;
 };
@@ -31,7 +28,7 @@ private:
 class PAMalaLloydUpdate :public Update{
 public:
     explicit PAMalaLloydUpdate(double (*dist)(NDVector&, NDVector&)): Update(dist) {}
-    void operator()(std::vector<Cluster>& clusters) override;
+    void operator()(Dataset& X, std::vector<Cluster>& clusters) override;
 
 private:
 

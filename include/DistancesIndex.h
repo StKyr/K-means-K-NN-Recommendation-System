@@ -1,9 +1,10 @@
 #ifndef ERGASIA2_DISTANCESINDEX_H
 #define ERGASIA2_DISTANCESINDEX_H
 
-
-#include <ApproximateNeighborSearch/NDVector.h>
+#include <vector>
 #include <map>
+#include <ApproximateNeighborSearch/NDVector.h>
+
 
 class DistancesIndex {
 

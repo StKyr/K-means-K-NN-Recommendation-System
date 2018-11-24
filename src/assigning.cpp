@@ -25,7 +25,8 @@ void LloydAssignment::operator() (Dataset& X, std::vector<Cluster>& clusters){
 
 
     int k = clusters.size();
-    std::vector<NDVector> all_centres(k);
+    std::vector<NDVector> all_centres;
+    all_centres.reserve(k);
 
     for (int i=0; i<k; i++){    // order not guaranteed in for each loop
         auto &C = clusters[i];
@@ -33,11 +34,11 @@ void LloydAssignment::operator() (Dataset& X, std::vector<Cluster>& clusters){
         all_centres.push_back(C.get_centroid());
     }
 
-    for (auto x: X){ //TODO: reimplement when X is changed
+    for (auto x: X){
 
         int closest_cluster_index = single_assignment(x.second, all_centres, dist);
         auto& C = clusters[closest_cluster_index];
-        C.assign(x.second);
+        C.assign(x.first);
     }
 
 }
@@ -128,6 +129,6 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
         }
 
         Cluster& C = clusters[cluster_index];
-        C.assign(x.second);
+        C.assign(x.first);
     }
 }

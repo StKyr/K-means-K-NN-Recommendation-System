@@ -9,8 +9,9 @@
 #include "metrics.h"
 
 
-typedef std::unordered_map<std::string, NDVector> Dataset;
-typedef std::map<std::string, NDVector> OrderedDataset;
+typedef std::string VectorId ;
+typedef std::unordered_map<VectorId, NDVector> Dataset;
+typedef std::map<VectorId, NDVector> OrderedDataset;
 
 class VectorCSVReader {
 public:
