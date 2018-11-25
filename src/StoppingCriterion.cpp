@@ -1,5 +1,6 @@
 #include <cmath>
 #include <StoppingCriterion.h>
+#include <DistancesIndex.h>
 
 
 bool OrCriteriaOrchestrator::should_stop(std::vector<Cluster>& clustering) {
@@ -8,7 +9,7 @@ bool OrCriteriaOrchestrator::should_stop(std::vector<Cluster>& clustering) {
         if (message.str().empty()) {
             message << c->what();
         }else{
-            message << " OR\n" << c->what();
+            message << " OR " << c->what();
         }
         criterion_found = true;
     }
@@ -23,7 +24,7 @@ bool AndCriteriaOrchestrator::should_stop(std::vector<Cluster>& clustering) {
 
 std::string AndCriteriaOrchestrator::what() {
     message << criteria[0]->what();
-    for (int i=1; i<criteria.size(); i++) message << " AND\n" << criteria[i]->what();
+    for (int i=1; i<criteria.size(); i++) message << " AND " << criteria[i]->what();
     return message.str();
 }
 
@@ -42,10 +43,18 @@ bool CentroidsDisplacement::should_stop(std::vector<Cluster> &clusters) {
         }
     }
     previous.clear();  for (auto c: clusters) previous.emplace_back(c);
-    return true;
+    return (passive)?false:true;
+}
+
+std::string CentroidsDisplacement::state() {
+    std::string s = "centroids: ";
+    for (auto& c: this->previous) s += str(c.get_centroid())+",";
+    return s;
 }
 
 bool ToleranceCentroidsDisplacement::should_stop(std::vector<Cluster> &clusters) {
+    if (passive) return false;
+
     if (previous.empty()){
         for (auto c: clusters) previous.emplace_back(c);
         return false;
@@ -64,7 +73,7 @@ bool ToleranceCentroidsDisplacement::should_stop(std::vector<Cluster> &clusters)
     if (previous_displacement != 0){
         if ( total_variance / previous_displacement < tol){
             previous_displacement = total_variance;
-            return true;
+            return (passive)?false: true;
         }else{
             previous_displacement = total_variance;
             return false;
@@ -75,13 +84,13 @@ bool ToleranceCentroidsDisplacement::should_stop(std::vector<Cluster> &clusters)
     }
 }
 
-double objective_function(Dataset* X, std::vector<Cluster> &clusters, double (*dist_sq)(NDVector&,NDVector&)){
+double objective_function(Dataset* X, std::vector<Cluster> &clusters){
 
     double obj = 0;
     for (auto& C: clusters){
         double cluster_obj = 0;
         for (auto& id: C.get_points()){
-            cluster_obj += dist_sq(C.get_centroid(), (*X)[id]);
+            cluster_obj += DistancesIndex::getInstance().distance(C.get_centroid(), (*X)[id]);
         }
         obj += cluster_obj;
     }
@@ -90,7 +99,7 @@ double objective_function(Dataset* X, std::vector<Cluster> &clusters, double (*d
 
 
 bool ObjectiveFunctionMinimization::should_stop(std::vector<Cluster> &clusters) {
-    double objective = objective_function(&(this->X), clusters, this->dist_sq);
+    double objective = objective_function(&(this->X), clusters);
     if (previous_objective == 0){
         previous_objective = objective;
         return false;
@@ -98,9 +107,29 @@ bool ObjectiveFunctionMinimization::should_stop(std::vector<Cluster> &clusters) 
 
     if (fabs(previous_objective-objective) / previous_objective < tol){
         previous_objective = objective;
-        return true;
+        return (passive)?false:true;
     }else{
         previous_objective = objective;
         return false;
     }
+}
+
+std::string CriteriaOrchestrator::state() {
+    std::string s;
+    for (auto& c: criteria) s+= c->state() + " | ";
+    return s;
+}
+
+bool AssignmentChanges::should_stop(std::vector<Cluster> &clusters) {
+    if (clusters_changed == -1){
+        previous_clusters = clusters;
+        clusters_changed = 0;
+        return false;
+    }
+
+    clusters_changed=0;
+    for (int i=0; i<clusters.size(); i++){
+        if (clusters[i].get_points() != previous_clusters[i].get_points()) clusters_changed++;
+    }
+    return (passive)?false:clusters_changed == 0;
 }

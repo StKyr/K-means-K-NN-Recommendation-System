@@ -2,17 +2,22 @@
 #define ERGASIA2_DISTANCESINDEX_H
 
 #include <vector>
-#include <map>
 #include <ApproximateNeighborSearch/NDVector.h>
+#include <unordered_map>
 
 
 class DistancesIndex {
 
 public:
-    explicit DistancesIndex(double (*distance_func)(NDVector&, NDVector&)):dist(distance_func){}
+    void initialize(double (*distance_func)(NDVector&, NDVector&)) {dist=distance_func;}
 
-    double get_distance(NDVector& p, NDVector& q){
-        auto key_str = p.toString()+"-"+q.toString();
+    static DistancesIndex& getInstance(){
+        static DistancesIndex index;
+        return index;
+    }
+
+    double distance(NDVector& p, NDVector& q){
+/*        auto key_str = p.toString()+"-"+q.toString();
 
         if (index.find(key_str) == index.end()){
             double d = dist(p,q);
@@ -20,12 +25,16 @@ public:
             return d;
         }else{
             return index[key_str];
-        }
+        }*/
+        return dist(p,q);
     }
 
+    DistancesIndex(DistancesIndex const&) = delete;
+    void operator=(DistancesIndex const&) = delete;
 private:
+    DistancesIndex() = default;
     double (*dist)(NDVector&, NDVector&);
-    std::map<std::string, double> index;
+    std::unordered_map<std::string, double> index;
 };
 
 

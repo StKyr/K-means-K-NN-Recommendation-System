@@ -21,11 +21,7 @@ public:
 
 class KMeansPlusPlus : public Initializer{
 public:
-    explicit KMeansPlusPlus(double (*dist)(NDVector&, NDVector&)) : dist(dist) {}
-
     std::vector<Cluster> operator () (Dataset& X, int k) override;
-private:
-    double (*dist)(NDVector&, NDVector&);
 };
 
 

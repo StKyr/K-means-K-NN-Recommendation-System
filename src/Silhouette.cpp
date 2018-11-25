@@ -1,11 +1,12 @@
+#include <DistancesIndex.h>
 #include "Silhouette.h"
 
 
 
 
-double average_distance(NDVector& p, std::vector<NDVector>& objects, double (*dist)(NDVector&, NDVector&)){
+double average_distance(NDVector& p, std::vector<NDVector>& objects){
     double d = 0;
-    for (auto q: objects) d += dist(p,q);
+    for (auto q: objects) d += DistancesIndex::getInstance().distance(p,q);
     return d / objects.size();
 }
 
@@ -17,7 +18,7 @@ std::vector<NDVector> ids_to_points(Dataset& X, std::vector<VectorId>& pointIds)
     return points;
 }
 
-SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_clusters, double (*dist)(NDVector&, NDVector&)){
+SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_clusters){
     int k = (int)final_clusters.size();
 
     SilhouetteResults results;
@@ -39,7 +40,7 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
                 continue;
             }
 
-            double d = dist(item.second, final_clusters[j].get_centroid());
+            double d = DistancesIndex::getInstance().distance(item.second, final_clusters[j].get_centroid());
             if (d < second_min_dist){
                 second_min_dist = d;
                 second_best_cluster_index = j;
@@ -49,10 +50,10 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
         if (second_best_cluster_index != -1) {
 
             std::vector<NDVector> best_cluster_points = ids_to_points(X,final_clusters[best_cluster_index].get_points());
-            double a_i = average_distance(item.second, best_cluster_points, dist);
+            double a_i = average_distance(item.second, best_cluster_points);
 
             std::vector<NDVector> second_best_cluster_points = ids_to_points(X,final_clusters[second_best_cluster_index].get_points());
-            double b_i = average_distance(item.second, second_best_cluster_points, dist);
+            double b_i = average_distance(item.second, second_best_cluster_points);
 
             double s_i = (b_i - a_i) / std::max(a_i, b_i);
             results.perClusterSilhouette[best_cluster_index] += s_i;

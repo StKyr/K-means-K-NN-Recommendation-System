@@ -15,8 +15,6 @@ public:
 
 
 
-SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_clusters,
-        double (*dist)(NDVector&, NDVector&));
-
+SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_clusters);
 
 #endif //ERGASIA2_SILHOUETTE_H

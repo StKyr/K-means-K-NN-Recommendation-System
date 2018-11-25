@@ -10,31 +10,25 @@
 
 class Assignment {
 public:
-    explicit Assignment(double (*dist)(NDVector&,NDVector&)):dist(dist){}
+    Assignment() = default;
     virtual void operator() (Dataset& X, std::vector<Cluster>& clusters) = 0;
 
 protected:
-    double (*dist)(NDVector&,NDVector&);
 };
 
 class LloydAssignment: public Assignment{
 public:
-    explicit LloydAssignment(double (*dist)(NDVector&,NDVector&)) :Assignment(dist){}
     void operator() (Dataset& X, std::vector<Cluster>& clusters) override;
-
 };
 
 
 class ReverseANNAssignment : public Assignment {
 public:
-    ReverseANNAssignment(AbstractSimilaritySearch& searchIndex, double (*dist)(NDVector&, NDVector&))
-        : Assignment(dist), searchIndex(searchIndex){}
-
+    ReverseANNAssignment(AbstractSimilaritySearch& searchIndex) : searchIndex(searchIndex){}
     void operator() (Dataset& X, std::vector<Cluster>& clusters) override;
 
 
 private:
-    //std::unordered_map<std::string, NDVector>& index;
     AbstractSimilaritySearch& searchIndex;
 };
 

@@ -23,17 +23,16 @@ public:
 };
 
 
-std::vector<Cluster> k_means_clustering(Dataset& X, int k, KMeansParams& params) {
+std::vector<Cluster> k_means_clustering(Dataset& X, int k, KMeansParams& params, bool verbose=false) {
 	std::vector<Cluster> clusters;
-int cnt=0;
-
 	clusters = params.initialize(X, k);
+	std::cout<<"initialized"<<std::endl;
 	do {
-std::cout<<"Iteration "<<++cnt<<std::endl;
 		params.assign(X, clusters);
 		params.update(X, clusters);
+		if (verbose) std::cout << params.stopping_criterion.state() << std::endl;
 	} while (!params.stopping_criterion.should_stop(clusters));
-
+    if (verbose) std::cout << params.stopping_criterion.state() << std::endl;
 	return clusters;
 }
 

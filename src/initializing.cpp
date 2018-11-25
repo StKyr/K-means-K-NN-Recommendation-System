@@ -1,10 +1,12 @@
 #include "initializing.h"
 #include <limits>
 #include <random>
+#include <DistancesIndex.h>
 
 std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k){
+    //todo: check this with tests
 
-    std::uniform_int_distribution<int> unif(0, (int)X.size());
+    std::uniform_int_distribution<int> unif(0, (int)X.size()-1);
     std::default_random_engine re;
 
     std::vector<Cluster> clusters;
@@ -19,23 +21,25 @@ std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k){
 
 
 
+
 /*
-int binary_probability_search(std::vector<double> arr, int l, int r, int x){
+int binary_probability_search(std::vector<double> arr, int l, int r, double x){
         if (r >= l){
             int mid = l + (r - l)/2;
-            if (x < arr[mid]) return binary_probability_search(arr, l, mid)
-            if (arr[mid] > x) return binary_search(arr, l, mid-1, x);
-            return binary_search(arr, mid+1, r, x);
+            if (x < arr[mid]) return binary_probability_search(arr, l,  mid, x);
+            if (arr[mid] > x) return binary_probability_search(arr, mid+1, r, x);
+            return mid;
         }
         return -1;
 }
-*/
+
 
 
 int linear_probability_search(std::vector<double> arr, double x){
     for (int i=0; i<arr.size()-1; i++) if (x >= arr[i] && x < arr[i+1]) return i;
     return (int)arr.size()-1;
 }
+*/
 
 
 std::string select_random_centroid(std::vector<std::pair<std::string, double>> distances, double D){
@@ -57,7 +61,7 @@ std::string select_random_centroid(std::vector<std::pair<std::string, double>> d
     std::default_random_engine re;
 
     //int index = binary_probability_search(P, 0, P.size(), x);
-    int index = linear_probability_search(P, unif(re));
+    int index = std::upper_bound(P.begin(), P.end(), unif(re)) - P.begin();//linear_probability_search(P, unif(re));
     return distances[index].first;
 }
 
@@ -86,7 +90,7 @@ std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k) {
 
             double Dr = std::numeric_limits<double>::max();
             for (int i=0; i<t; i++){
-                double d = dist(item.second, initial_centers[i]);
+                double d = DistancesIndex::getInstance().distance(item.second, initial_centers[i]);
                 if (d < Dr) Dr = d;
             }
             all_distances.emplace_back(std::make_pair(item.first, Dr));

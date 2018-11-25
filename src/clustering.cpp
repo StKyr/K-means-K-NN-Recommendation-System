@@ -5,11 +5,13 @@
 #include <assigning.h>
 #include <kmeans.hpp>
 #include <Silhouette.h>
+#include <StoppingCriterion.h>
+#include <DistancesIndex.h>
 
 namespace Params {
     std::string input_file = "../datasets/twitter_dataset_small_v2.csv";
     std::string output_file = "../output.txt";
-    int K = 50;
+    int K = 200;
     int W;
     int L;
     int K_LSH;
@@ -18,19 +20,21 @@ namespace Params {
 }
 
 
-Criterion* create_criteria(Dataset& X, double (*dist_sq)(NDVector&, NDVector&)){
+Criterion* create_criteria(Dataset& X){
 
     CriteriaOrchestrator *orchestrator = new OrCriteriaOrchestrator();
 
-    Criterion *c1 = new IteratorCounter(20);
+    Criterion *c1 = new IteratorCounter(50);
     Criterion *c2 = new CentroidsDisplacement();
     Criterion *c3 = new ToleranceCentroidsDisplacement(0.1);
-    Criterion *c4 = new ObjectiveFunctionMinimization(0.01, X, dist_sq); //TODO: implement squared distance
+    Criterion *c4 = new ObjectiveFunctionMinimization(0.0001, X); //TODO: implement squared distance
+    Criterion *c5 = new AssignmentChanges();
 
     orchestrator->add_criterion(c1);
-    orchestrator->add_criterion(c2);
+    //orchestrator->add_criterion(c2);
     orchestrator->add_criterion(c3);
     orchestrator->add_criterion(c4);
+    orchestrator->add_criterion(c5);
 
     return orchestrator; //TODO: memory leak here
 }
@@ -44,17 +48,20 @@ int main(int argc, char *argv[]){
             metrics::euclidean_distance : metrics::cosine_distance;
 
 
-    Initializer *initializing_method = new RandomInitializer();
-    Assignment  *assignment_method   = new LloydAssignment(distance);
-    Update      *updating_method     = new KMeansUpdate(reader.vectorDim, distance);
-    Criterion   *criterion           = create_criteria(*X, distance);
+    DistancesIndex::getInstance().initialize(distance);
+
+    Initializer *initializing_method = new KMeansPlusPlus();//new RandomInitializer();
+    Assignment  *assignment_method   = new LloydAssignment();
+    Update      *updating_method     = new KMeansUpdate(reader.vectorDim);
+    Criterion   *criterion           = create_criteria(*X);
     KMeansParams k_means_params(*initializing_method, *assignment_method, *updating_method, *criterion);
 
-    std::vector<Cluster> results = k_means_clustering(*X, Params::K, k_means_params);
+    std::cout << "starting k-means" <<std::endl;
+    std::vector<Cluster> results = k_means_clustering(*X, Params::K, k_means_params, true);
     std::cout << "k-means finished. (" << criterion->what() << ")" << std::endl;
 
-    auto estimation = compute_silhouettes(*X, results, distance);
-    //for (int i=0; i<Params::K; i++) std::cout << "Silhouette of cluster "<<i+1<<": "<<estimation.perClusterSilhouette[i]<<std::endl;
+    auto estimation = compute_silhouettes(*X, results);
+    for (int i=0; i<Params::K; i++) std::cout << "Silhouette of cluster "<<i+1<<": "<<estimation.perClusterSilhouette[i]<<std::endl;
     std::cout<<"Average silhouette: "<<estimation.averageSilhouette << std::endl;
 
 
