@@ -1,7 +1,6 @@
 #include <DistancesTable.h>
 #include "assigning.h"
 
-//TODO: Fuckin understand references
 
 int single_assignment(NDVector& x, std::vector<NDVector>& representatives){
     unsigned long k = representatives.size();
@@ -85,7 +84,8 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
         std::set<std::string> nearby_points_to_centre = this-> searchIndex.retrieveNeighbors(clusters[i].get_centroid());       // 3.
         for (auto &vectorId : nearby_points_to_centre){                                                                 // 4.
 
-            if (nearestCenters.find(vectorId) != nearestCenters.end()){                                                 // 4a.
+            if (nearestCenters.find(vectorId) == nearestCenters.end()){                                                 // 4a.
+                //double d = DistancesTable::getInstance().distance(X[vectorId], clusters[i].get_centroid());
                 nearestCenters[vectorId] = std::make_pair(i,-1.0);
 
             }else {

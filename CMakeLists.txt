@@ -37,7 +37,7 @@ add_executable(ergasia2
         include/StoppingCriterion.h
         include/cluster.hpp include/utils.hpp
         include/DistancesTable.h
-        src/DistancesTable.cpp)
+        src/DistancesTable.cpp src/parameters.cpp src/parameters.hpp)
 
 
 add_subdirectory(test)

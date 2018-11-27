@@ -5,6 +5,7 @@
 #include <assigning.h>
 #include <DistancesTable.h>
 #include <utils.hpp>
+#include <ApproximateNeighborSearch/EuclideanSpaceLSH.h>
 
 
 TEST(assign, single_assignment){
@@ -91,13 +92,13 @@ TEST(assign, two_same_centroids){
 }
 
 TEST(assign, two_same_centroids_cosine){
-    
+
     Dataset X;
     for (int i=0; i<50; i++) X[str(i)] = NDVector::random_vector(3);
 
     DistancesTable::getInstance().initialize(X.size(), metrics::cosine_distance);
 
-    
+
     std::vector<Cluster> clusters;
     NDVector c1 = NDVector::random_vector(3);
 
@@ -129,7 +130,7 @@ TEST(assign, three_clustres_easy){
 
     DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
 
-    
+
     std::vector<Cluster> clusters;
     NDVector c1({0,0,0});
     NDVector c2({100,100,100});
@@ -164,7 +165,7 @@ TEST(assign, three_clustres_easy_cosine){
     X["3_1"] = NDVector({700, 0.1, -0.1});
 
     DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
-    
+
     std::vector<Cluster> clusters;
     NDVector c1({ 1, 1, 1});
     NDVector c2({-1,-1,-1});
@@ -184,4 +185,28 @@ TEST(assign, three_clustres_easy_cosine){
     EXPECT_EQ(vec2set(clusters[0].get_points()), std::set<VectorId>({"1_1","1_2", "1_3"}));
     EXPECT_EQ(vec2set(clusters[1].get_points()), std::set<VectorId>({"2_1","2_2"}));
     EXPECT_EQ(vec2set(clusters[2].get_points()), std::set<VectorId>({"3_1"}));
+}
+
+TEST(lsh, single_point){
+    Dataset X;
+    X["id1"] = NDVector({1,1,1});
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
+    std::vector<Cluster> clusters;
+    NDVector v1 = {1.1, 1.2, 1.3};
+    NDVector v2 = {10.1, 10.2, 10.3};
+    NDVector v3 = {100.1, 100.2, 100.3};
+    clusters.push_back(Cluster(v1));
+    clusters.push_back(Cluster(v1));
+    clusters.push_back(Cluster(v1));
+
+    EuclideanSpaceLSH lsh(3, X.size(), 2, 3, 4);
+    lsh.insertDataset(X);
+    ReverseANNAssignment assignment(lsh);
+
+    assignment(X, clusters);
+
+    EXPECT_EQ(clusters[0].num_points(), X.size());
+
 }

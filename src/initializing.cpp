@@ -10,15 +10,18 @@ std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k){
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    std::set<int> vector_indexes;
-    while (vector_indexes.size() < k) vector_indexes.insert(unif(gen));
-
     std::vector<Cluster> clusters;
     clusters.reserve(k);
 
-    for (auto index: vector_indexes){
-        auto it = X.begin();std::advance(it, index);
-        clusters.emplace_back(Cluster((*it).second));
+    std::set<NDVector> centroids;
+    while (centroids.size() < k){
+        auto it = X.begin();
+        std::advance(it, unif(gen));
+        centroids.insert((*it).second);
+    }
+
+    for (auto c: centroids){
+        clusters.emplace_back(Cluster(c));
     }
     return clusters;
 }

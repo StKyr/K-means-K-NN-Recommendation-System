@@ -7,11 +7,14 @@
 #include <Silhouette.h>
 #include <StoppingCriterion.h>
 #include <DistancesTable.h>
+#include <ApproximateNeighborSearch/similaritySearch.h>
+#include <ApproximateNeighborSearch/EuclideanSpaceLSH.h>
+#include <ApproximateNeighborSearch/HypercubeProjection.h>
 
 namespace Params {
     std::string input_file = "../datasets/twitter_dataset_small_v2.csv";
     std::string output_file = "../output.txt";
-    int K = 50;
+    int K = 200;
     int W;
     int L;
     int K_LSH;
@@ -22,21 +25,16 @@ namespace Params {
 
 Criterion* create_criteria(Dataset& X){
 
-    CriteriaOrchestrator *orchestrator = new OrCriteriaOrchestrator();
-
     Criterion *c1 = new IteratorCounter(50);
-    Criterion *c2 = new CentroidsDisplacement();
-    Criterion *c3 = new ToleranceCentroidsDisplacement(0.0000001);
-    Criterion *c4 = new ObjectiveFunctionMinimization(0.000001, X); //TODO: implement squared distance
-    Criterion *c5 = new AssignmentChanges();
+    Criterion *c3 = new ToleranceCentroidsDisplacement(0.00000001);
+    Criterion *c4 = new ObjectiveFunctionMinimization(0.0000001, X); //TODO: implement squared distance
 
-    orchestrator->add_criterion(c1);
-    //orchestrator->add_criterion(c2);
-    orchestrator->add_criterion(c3);
-    orchestrator->add_criterion(c4);
-    orchestrator->add_criterion(c5);
+    CriteriaOrchestrator *or1 = new OrCriteriaOrchestrator();
+    or1->add_criterion(c1);
+    or1->add_criterion(c3);
+    or1->add_criterion(c4);
 
-    return orchestrator; //TODO: memory leak here
+    return or1; //TODO: memory leak here
 }
 
 
@@ -51,7 +49,13 @@ int main(int argc, char *argv[]){
     DistancesTable::getInstance().initialize(X->size(), distance);
 
     Initializer *initializing_method = new KMeansPlusPlus();//new RandomInitializer();
-    Assignment  *assignment_method   = new LloydAssignment();
+
+    //AbstractSimilaritySearch* searcher = new EuclideanSpaceLSH(5, X->size()/8, 4, reader.vectorDim, (int)(1.5*reader.vectorDim));
+    AbstractSimilaritySearch* searcher = new EuclideanHypercubeProjection(5, 500, 20, 10, (int)(1.5*reader.vectorDim), 4);
+    searcher->insertDataset(*X);
+
+
+    Assignment  *assignment_method   = new ReverseANNAssignment(*searcher);
     Update      *updating_method     = new KMeansUpdate(reader.vectorDim);
     Criterion   *criterion           = create_criteria(*X);
     KMeansParams k_means_params(*initializing_method, *assignment_method, *updating_method, *criterion);
