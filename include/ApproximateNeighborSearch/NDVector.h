@@ -22,13 +22,13 @@ public:
 
     NDVector&     operator =  (const NDVector& rhs)                = default;
     NDVector&     operator =  (std::initializer_list<double> list);
-    inline bool   operator == (const NDVector& rhs)                {return this->coords == rhs.coords; }
+    inline bool   operator == (const NDVector& rhs)       const          {return this->coords == rhs.coords; }
     inline bool   operator != (const NDVector& rhs)                {return ! (*this == rhs);}
 
-    inline bool   operator <  (const NDVector& rhs)                {throw std::logic_error("Nonsensical vector comparison");}
-    inline bool   operator <= (const NDVector& rhs)                {throw std::logic_error("Nonsensical vector comparison");}
-    inline bool   operator >  (const NDVector& rhs)                {throw std::logic_error("Nonsensical vector comparison");}
-    inline bool   operator >= (const NDVector& rhs)                {throw std::logic_error("Nonsensical vector comparison");}
+    inline bool   operator <  (const NDVector& rhs)       const    {return this->coords < rhs.coords;}//{throw std::logic_error("Nonsensical vector comparison");}
+    inline bool   operator <= (const NDVector& rhs)       const    {return this->operator<(rhs) || this->coords == rhs.coords;}//{throw std::logic_error("Nonsensical vector comparison");}
+    inline bool   operator >  (const NDVector& rhs)       const    {return !this->operator<=(rhs);}//{throw std::logic_error("Nonsensical vector comparison");}
+    inline bool   operator >= (const NDVector& rhs)       const    {return !this->operator<(rhs);}//{throw std::logic_error("Nonsensical vector comparison");}
 
     NDVector      operator +  (const NDVector& rhs);
     NDVector      operator -  (const NDVector& rhs);
@@ -44,6 +44,7 @@ public:
     static NDVector random_vector(int dimension);
     static NDVector zero_vector(int dimension);
 
+    static NDVector null_vector;
 private:
     std::vector<double> coords;
 };
@@ -51,5 +52,9 @@ private:
 NDVector      operator *  (double l, NDVector& rhs);
 std::ostream& operator << (std::ostream& os, NDVector& rhs);
 
+
+/*bool NDVector::operator==(const NDVector rhs){
+    return lhs.coords == rhs.coords;
+}*/
 
 #endif //ERGASIA1_NDVECTOR_H

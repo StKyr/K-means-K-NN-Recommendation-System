@@ -3,12 +3,9 @@
 
 #include <vector>
 #include "cluster.hpp"
+#include "utils.hpp"
 #include <sstream>
 
-template <typename T>
-std::string str(T &obj){
-    std::stringstream ss;ss << obj;return ss.str();
-}
 
 /* Note: For facilitating multiple criteria in an AND or OR fashion - along with combinations
  * of those, in this file, the "Composite Design Pattern" is implemented.

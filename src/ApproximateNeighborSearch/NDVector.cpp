@@ -2,6 +2,7 @@
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <random>
 
+NDVector NDVector::null_vector;
 
 NDVector::NDVector(std::vector<double>& coords){
     this->coords = coords;
@@ -154,11 +155,12 @@ std::ostream& operator << (std::ostream& os, NDVector& rhs)
 
 NDVector NDVector::random_vector(int dimension){
     std::uniform_real_distribution<double> unif(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
-    std::default_random_engine re;
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
     std::vector<double> coords;
     coords.reserve(dimension);
-    for (int j=0; j<dimension; j++) coords.push_back(unif(re));
+    for (int j=0; j<dimension; j++) coords.push_back(unif(gen));
     return NDVector(coords);
 }
 

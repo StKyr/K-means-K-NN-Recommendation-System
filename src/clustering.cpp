@@ -11,7 +11,7 @@
 namespace Params {
     std::string input_file = "../datasets/twitter_dataset_small_v2.csv";
     std::string output_file = "../output.txt";
-    int K = 200;
+    int K = 5;
     int W;
     int L;
     int K_LSH;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
 
     DistancesIndex::getInstance().initialize(distance);
 
-    Initializer *initializing_method = new KMeansPlusPlus();//new RandomInitializer();
+    Initializer *initializing_method = new RandomInitializer();
     Assignment  *assignment_method   = new LloydAssignment();
     Update      *updating_method     = new KMeansUpdate(reader.vectorDim);
     Criterion   *criterion           = create_criteria(*X);
