@@ -2,6 +2,7 @@
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <ApproximateNeighborSearch/VectorCSVReader.h>
 #include <initializing.h>
+#include <DistancesTable.h>
 
 template <typename T>
 std::string str(T &obj){
@@ -71,6 +72,9 @@ TEST(test_initializations, plus_plus_dont_crash) {
     X["id7"] = NDVector({1,2,353});
     X["id8"] = NDVector({12,00,3});
     X["id9"] = NDVector({1,1,1});
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
 
     Initializer* init = new KMeansPlusPlus();
     auto clusters = (*init)(X, 2);

@@ -128,7 +128,7 @@ TEST(testNDVector, equality_operators){
 
 }
 
-TEST(testNDVEctor, copy_constructor){
+TEST(testNDVector, copy_constructor){
     NDVector v1 = NDVector({1, 2, 3});
     NDVector &v2 = v1;
 
@@ -191,48 +191,6 @@ TEST(testNDVector, invalid_operations1){
         FAIL() << "Different type of exception was thrown.";
     }
 
-
-}
-
-TEST(testNDVector, invalid_operations2){
-    NDVector v1 = NDVector({1, 2, 3});
-    NDVector v2 = NDVector({4, 5, 6});
-
-    try {
-        v1 < v2;
-        FAIL() << "Exception was not thrown on empty vector.";
-    }catch (std::logic_error& e){
-        EXPECT_EQ(e.what(), std::string("Nonsensical vector comparison"));
-    }catch(...){
-        FAIL() << "Different type of exception was thrown.";
-    }
-
-    try {
-        v1 > v2;
-        FAIL() << "Exception was not thrown on empty vector.";
-    }catch (std::logic_error& e){
-        EXPECT_EQ(e.what(), std::string("Nonsensical vector comparison"));
-    }catch(...){
-        FAIL() << "Different type of exception was thrown.";
-    }
-
-    try {
-        v1 <= v2;
-        FAIL() << "Exception was not thrown on empty vector.";
-    }catch (std::logic_error& e){
-        EXPECT_EQ(e.what(), std::string("Nonsensical vector comparison"));
-    }catch(...){
-        FAIL() << "Different type of exception was thrown.";
-    }
-
-    try {
-        v1 >= v2;
-        FAIL() << "Exception was not thrown on empty vector.";
-    }catch (std::logic_error& e){
-        EXPECT_EQ(e.what(), std::string("Nonsensical vector comparison"));
-    }catch(...) {
-        FAIL() << "Different type of exception was thrown.";
-    }
 
 }
 

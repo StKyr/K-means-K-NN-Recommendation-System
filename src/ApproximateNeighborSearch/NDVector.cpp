@@ -1,16 +1,23 @@
 #include <iostream>
 #include <ApproximateNeighborSearch/NDVector.h>
 #include <random>
+#include <utils.hpp>
 
 NDVector NDVector::null_vector;
 
-NDVector::NDVector(std::vector<double>& coords){
+
+
+
+
+NDVector::NDVector(std::vector<double>& coords, long id){
     this->coords = coords;
+    this->id = id;
 }
 
 NDVector::NDVector(std::initializer_list<double> list){
     this->coords = std::vector<double>();
     for (auto x : list) this->coords.push_back(x);
+    this->id = -1;
 }
 
 unsigned long NDVector::dim() const{
@@ -69,7 +76,7 @@ NDVector NDVector::operator +  (const NDVector& rhs){
     for (int i=0; i<this->dim(); i++){
         result.push_back(this->coords[i] + rhs.coords[i]);
     }
-    return NDVector(result);
+    return NDVector(result, -1);
 }
 NDVector   NDVector::operator -  (const NDVector& rhs){
     if (rhs.dim() != this->dim() ) throw std::logic_error("Nonsensical vector subtraction of different dimensions");
@@ -78,7 +85,7 @@ NDVector   NDVector::operator -  (const NDVector& rhs){
     for (int i=0; i<this->dim(); i++){
         result.push_back(this->coords[i] - rhs.coords[i]);
     }
-    return NDVector(result);
+    return NDVector(result, -1);
 }
 
 
@@ -90,7 +97,7 @@ NDVector   operator *  (double l, NDVector& rhs){
         double x = rhs[i];
         result.push_back(l * x);
     }
-    return NDVector(result);
+    return NDVector(result, -1);
 }
 
 
@@ -161,14 +168,14 @@ NDVector NDVector::random_vector(int dimension){
     std::vector<double> coords;
     coords.reserve(dimension);
     for (int j=0; j<dimension; j++) coords.push_back(unif(gen));
-    return NDVector(coords);
+    return NDVector(coords, -1);
 }
 
 NDVector NDVector::zero_vector(int dimension){
     std::vector<double> coords;
     coords.reserve(dimension);
     for (int j=0; j<dimension; j++) coords.push_back(0);
-    return NDVector(coords);
+    return NDVector(coords, -1);
 }
 
 

@@ -3,7 +3,7 @@
 #include <initializing.h>
 #include <gtest/gtest.h>
 #include <updating.h>
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 #include <utils.hpp>
 
 TEST(test_updating, simple_test_kmeans ) {
@@ -45,7 +45,6 @@ TEST(test_updating, empty_cluster_kmeans ) {
 }
 
 TEST(test_updating, simple_test_pam ) {
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
 
     Dataset X;
     X["id0"] = NDVector({2,2});
@@ -53,6 +52,9 @@ TEST(test_updating, simple_test_pam ) {
     X["id2"] = NDVector({0,2});
     X["id3"] = NDVector({2,0});
     X["medoid"] = NDVector({1,1});
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
 
 
     PAMalaLloydUpdate update;
@@ -65,6 +67,8 @@ TEST(test_updating, simple_test_pam ) {
     clusters[0].assign("id3");
     clusters[0].assign("medoid");
     update(X, clusters);
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
 
 
     EXPECT_EQ(clusters[0].get_centroid(), NDVector({1,1}));
@@ -81,6 +85,9 @@ TEST(test_updating, empty_cluster_pam){
     clusters.push_back(Cluster(v));
     update(EMPTY, clusters);
 
+    DistancesTable::getInstance().initialize(EMPTY.size(), metrics::euclidean_distance);
+
+
 
     EXPECT_EQ(clusters[0].get_centroid(), NDVector::null_vector);
 
@@ -88,10 +95,12 @@ TEST(test_updating, empty_cluster_pam){
 
 
 TEST(test_distances_index, rand_dataset_single_cluster){
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
     Dataset X;
 
-    for (int i=0; i<10; i++) X[str(i)] = NDVector::random_vector(204);
+    for (int i=0; i<100; i++) X[str(i)] = NDVector::random_vector(204);
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
 
     PAMalaLloydUpdate update;
     std::vector<Cluster> clusters;
@@ -103,7 +112,5 @@ TEST(test_distances_index, rand_dataset_single_cluster){
     update(X, clusters);
 
     std::cout << std::endl;
-    DistancesIndex::getInstance().print_stats();
-
-
+    DistancesTable::getInstance().print_stats();
 }

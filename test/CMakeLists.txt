@@ -27,7 +27,11 @@ add_executable(runUnitTests dummyTest.cpp testNDVector.cpp
         ../src/updating.cpp
         ../src/Silhouette.cpp
         ../src/StoppingCriterion.cpp
-        ../include/cluster.hpp test_assignments.cpp ../include/utils.hpp)
+        ../include/cluster.hpp
+        test_assignments.cpp
+        ../include/utils.hpp
+        ../include/DistancesTable.h
+        ../src/DistancesTable.cpp)
 
 
 target_link_libraries(runUnitTests gtest gtest_main)

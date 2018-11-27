@@ -14,7 +14,7 @@ hCos::hCos(int d) {
     for (int i=0; i<d; i++){
         r_coords.push_back(  dist_normal(gen) );
     }
-    this->r = NDVector(r_coords);
+    this->r = NDVector(r_coords, -1);
 }
 
 int hCos::operator()(NDVector &p) {

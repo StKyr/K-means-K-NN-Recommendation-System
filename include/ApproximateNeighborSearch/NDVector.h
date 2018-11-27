@@ -12,15 +12,16 @@ class NDVector{
 
 public:
     // member functions
-                  NDVector()                                       = default;
-    explicit      NDVector(std::vector<double>& coords);
+                  NDVector()                                      = default;
+                  NDVector(std::vector<double>& coords, long id);
                   NDVector(std::initializer_list<double> list);
     unsigned long dim     ()                                       const;
     double        norm    (unsigned long p=2)                      const;
     double        dot     (const NDVector& rhs)                    const;
 
+    long          getId   () const {return id;}
 
-    NDVector&     operator =  (const NDVector& rhs)                = default;
+    NDVector&     operator =  (const NDVector& rhs) = default;
     NDVector&     operator =  (std::initializer_list<double> list);
     inline bool   operator == (const NDVector& rhs)       const          {return this->coords == rhs.coords; }
     inline bool   operator != (const NDVector& rhs)                {return ! (*this == rhs);}
@@ -46,6 +47,7 @@ public:
 
     static NDVector null_vector;
 private:
+    long id = -1;
     std::vector<double> coords;
 };
 

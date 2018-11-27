@@ -3,13 +3,12 @@
 #include <algorithm>
 #include <sstream>
 #include <ApproximateNeighborSearch/VectorCSVReader.h>
+#include <utils.hpp>
 
-static inline std::string &ltrim(std::string &s) {
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                    std::not1(std::ptr_fun<int, int>(std::isspace))));
-    return s;
+namespace ID{
+    static size_t cnt=0;
+    size_t get() {return cnt++;}
 }
-
 
 std::pair<std::string, std::vector<double>> VectorCSVReader::parseNextLine(){
 
@@ -66,7 +65,7 @@ Dataset* VectorCSVReader::readDataset() {
 
     while(!nextVector.first.empty()){
 
-        NDVector v(nextVector.second);
+        NDVector v(nextVector.second, ID::get());
 
         if (! this->vectorDim) this->vectorDim = (int)v.dim();
 
@@ -96,7 +95,7 @@ OrderedDataset* VectorCSVReader::readOrderedDataset() {
 
     while(!nextVector.first.empty()){
 
-        NDVector v(nextVector.second);
+        NDVector v(nextVector.second,-1);
 
         if (! this->vectorDim) this->vectorDim = (int)v.dim();
 

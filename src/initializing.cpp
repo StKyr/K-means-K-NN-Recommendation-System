@@ -1,7 +1,7 @@
 #include "initializing.h"
 #include <limits>
 #include <random>
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 #include <set>
 
 std::vector<Cluster> RandomInitializer::operator () (Dataset& X, int k){
@@ -105,7 +105,7 @@ std::vector<Cluster> KMeansPlusPlus::operator()(Dataset& X, int k) {
 
 
             for (int i=0; i<t; i++){                                                                                    // for each chosen centroid
-                double d = DistancesIndex::getInstance().distance(item.second, initial_centers[i]);                     // compute its distance
+                double d = DistancesTable::getInstance().distance(item.second, initial_centers[i]);                     // compute its distance
                 D_i = std::min(D_i, d);                                                                                 // keep the minimum
             }
 

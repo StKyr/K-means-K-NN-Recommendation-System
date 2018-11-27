@@ -1,6 +1,6 @@
 #include <cmath>
 #include <StoppingCriterion.h>
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 
 
 bool OrCriteriaOrchestrator::should_stop(std::vector<Cluster>& clustering) {
@@ -90,7 +90,7 @@ double objective_function(Dataset* X, std::vector<Cluster> &clusters){
     for (auto& C: clusters){
         double cluster_obj = 0;
         for (auto& id: C.get_points()){
-            cluster_obj += DistancesIndex::getInstance().distance(C.get_centroid(), (*X)[id]);
+            cluster_obj += DistancesTable::getInstance().distance(C.get_centroid(), (*X)[id]);
         }
         obj += cluster_obj;
     }

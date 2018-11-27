@@ -21,7 +21,7 @@ hEucl::hEucl(int w, int d) :w(w) {
     for (int i=0; i<d; i++){
         v_coords.push_back(  dist_normal(gen) );
     }
-    this->v = NDVector(v_coords);
+    this->v = NDVector(v_coords, -1);
 }
 
 

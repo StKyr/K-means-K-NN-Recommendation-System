@@ -1,15 +1,15 @@
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 #include "assigning.h"
 
 //TODO: Fuckin understand references
 
 int single_assignment(NDVector& x, std::vector<NDVector>& representatives){
     unsigned long k = representatives.size();
-    double min_distance = DistancesIndex::getInstance().distance(x, representatives[0]);
+    double min_distance = DistancesTable::getInstance().distance(x, representatives[0]);
     int closest_cluster_index = 0;
 
     for (int i=1; i<k; i++){
-        double d = DistancesIndex::getInstance().distance(x, representatives[i]);
+        double d = DistancesTable::getInstance().distance(x, representatives[i]);
 
         if (d < min_distance){
             min_distance = d;
@@ -92,12 +92,12 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
                 NDVector &p = X[vectorId];
                 NDVector &c_curr = clusters[i].get_centroid();
 
-                double dist_curr = DistancesIndex::getInstance().distance(p, c_curr);
+                double dist_curr = DistancesTable::getInstance().distance(p, c_curr);
 
                 if (nearestCenters[vectorId].second == -1) {                                                            // 4b.
                     int i_prev = nearestCenters[vectorId].first;
                     NDVector &c_prev = clusters[i_prev].get_centroid();
-                    double dist_prev = DistancesIndex::getInstance().distance(p, c_prev);
+                    double dist_prev = DistancesTable::getInstance().distance(p, c_prev);
 
                     if (dist_curr < dist_prev) nearestCenters[vectorId] = std::make_pair(i, dist_curr);
                     else                       nearestCenters[vectorId] = std::make_pair(i_prev, dist_prev);

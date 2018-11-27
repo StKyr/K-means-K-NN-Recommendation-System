@@ -1,4 +1,4 @@
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 #include "Silhouette.h"
 
 
@@ -6,7 +6,7 @@
 
 double average_distance(NDVector& p, std::vector<NDVector>& objects){
     double d = 0;
-    for (auto q: objects) d += DistancesIndex::getInstance().distance(p,q);
+    for (auto q: objects) d += DistancesTable::getInstance().distance(p,q);
     return d / objects.size();
 }
 
@@ -40,7 +40,7 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
                 continue;
             }
 
-            double d = DistancesIndex::getInstance().distance(item.second, final_clusters[j].get_centroid());
+            double d = DistancesTable::getInstance().distance(item.second, final_clusters[j].get_centroid());
             if (d < second_min_dist){
                 second_min_dist = d;
                 second_best_cluster_index = j;

@@ -6,12 +6,12 @@
 #include <kmeans.hpp>
 #include <Silhouette.h>
 #include <StoppingCriterion.h>
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 
 namespace Params {
     std::string input_file = "../datasets/twitter_dataset_small_v2.csv";
     std::string output_file = "../output.txt";
-    int K = 5;
+    int K = 50;
     int W;
     int L;
     int K_LSH;
@@ -26,8 +26,8 @@ Criterion* create_criteria(Dataset& X){
 
     Criterion *c1 = new IteratorCounter(50);
     Criterion *c2 = new CentroidsDisplacement();
-    Criterion *c3 = new ToleranceCentroidsDisplacement(0.1);
-    Criterion *c4 = new ObjectiveFunctionMinimization(0.0001, X); //TODO: implement squared distance
+    Criterion *c3 = new ToleranceCentroidsDisplacement(0.0000001);
+    Criterion *c4 = new ObjectiveFunctionMinimization(0.000001, X); //TODO: implement squared distance
     Criterion *c5 = new AssignmentChanges();
 
     orchestrator->add_criterion(c1);
@@ -48,9 +48,9 @@ int main(int argc, char *argv[]){
             metrics::euclidean_distance : metrics::cosine_distance;
 
 
-    DistancesIndex::getInstance().initialize(distance);
+    DistancesTable::getInstance().initialize(X->size(), distance);
 
-    Initializer *initializing_method = new RandomInitializer();
+    Initializer *initializing_method = new KMeansPlusPlus();//new RandomInitializer();
     Assignment  *assignment_method   = new LloydAssignment();
     Update      *updating_method     = new KMeansUpdate(reader.vectorDim);
     Criterion   *criterion           = create_criteria(*X);

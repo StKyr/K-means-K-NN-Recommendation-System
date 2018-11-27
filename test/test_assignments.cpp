@@ -3,14 +3,11 @@
 #include <ApproximateNeighborSearch/VectorCSVReader.h>
 #include <cluster.hpp>
 #include <assigning.h>
-#include <DistancesIndex.h>
+#include <DistancesTable.h>
 #include <utils.hpp>
 
 
 TEST(assign, single_assignment){
-
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
-
     Dataset X;
     X["id0"] = NDVector({1,2,3});
     X["id1"] = NDVector({4,5,3});
@@ -22,6 +19,9 @@ TEST(assign, single_assignment){
     X["id7"] = NDVector({1,2,353});
     X["id8"] = NDVector({12,00,3});
     X["id9"] = NDVector({1,1,1});
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
 
 
     std::vector<Cluster> clusters;
@@ -35,8 +35,9 @@ TEST(assign, single_assignment){
 }
 
 TEST(assign, empty_single_assignment){
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
     Dataset EMPTY;
+    DistancesTable::getInstance().initialize(EMPTY.size(), metrics::euclidean_distance);
+
 
 
     std::vector<Cluster> clusters;
@@ -50,10 +51,9 @@ TEST(assign, empty_single_assignment){
 
 
 TEST(assign, two_clustres_single_point){
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
-
     Dataset X;
     X["id0"] = NDVector({99,99,99});
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
 
 
     std::vector<Cluster> clusters;
@@ -71,10 +71,10 @@ TEST(assign, two_clustres_single_point){
 }
 
 TEST(assign, two_same_centroids){
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
-
     Dataset X;
     for (int i=0; i<50; i++) X[str(i)] = NDVector::random_vector(3);
+
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
 
 
     std::vector<Cluster> clusters;
@@ -91,13 +91,13 @@ TEST(assign, two_same_centroids){
 }
 
 TEST(assign, two_same_centroids_cosine){
-
-    DistancesIndex::getInstance().initialize(metrics::cosine_distance);
-
+    
     Dataset X;
     for (int i=0; i<50; i++) X[str(i)] = NDVector::random_vector(3);
 
+    DistancesTable::getInstance().initialize(X.size(), metrics::cosine_distance);
 
+    
     std::vector<Cluster> clusters;
     NDVector c1 = NDVector::random_vector(3);
 
@@ -117,7 +117,6 @@ TEST(assign, two_same_centroids_cosine){
 
 
 TEST(assign, three_clustres_easy){
-    DistancesIndex::getInstance().initialize(metrics::euclidean_distance);
     Dataset X;
     X["1_1"] = NDVector({1,2,3});
     X["1_2"] = NDVector({4,5,6});
@@ -128,6 +127,9 @@ TEST(assign, three_clustres_easy){
 
     X["3_1"] = NDVector({-30,-30,-30});
 
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+
+    
     std::vector<Cluster> clusters;
     NDVector c1({0,0,0});
     NDVector c2({100,100,100});
@@ -150,7 +152,6 @@ TEST(assign, three_clustres_easy){
 }
 
 TEST(assign, three_clustres_easy_cosine){
-    DistancesIndex::getInstance().initialize(metrics::cosine_distance);
 
     Dataset X;
     X["1_1"] = NDVector({100,100,100});
@@ -162,6 +163,8 @@ TEST(assign, three_clustres_easy_cosine){
 
     X["3_1"] = NDVector({700, 0.1, -0.1});
 
+    DistancesTable::getInstance().initialize(X.size(), metrics::euclidean_distance);
+    
     std::vector<Cluster> clusters;
     NDVector c1({ 1, 1, 1});
     NDVector c2({-1,-1,-1});
