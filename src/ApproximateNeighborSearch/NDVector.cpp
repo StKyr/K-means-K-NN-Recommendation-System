@@ -38,6 +38,12 @@ double NDVector::norm(unsigned long p) const{
     return n;
 }
 
+double NDVector::norm_sq() const {
+    double sum=0;
+    for (auto x: this->coords) sum += x*x;
+    return sum;
+}
+
 
 double NDVector::dot(const NDVector& rhs)const{
     if (this->coords.empty()) throw std::range_error("Unitialized Vector Exception");

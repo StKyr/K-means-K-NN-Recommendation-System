@@ -43,7 +43,7 @@ std::pair<std::string, std::vector<double>> VectorCSVReader::parseNextLine(){
             }
 
         }catch(std::exception& e) {
-            throw std::runtime_error("Invalid format of "+filename+". (Do lines have ID and are they TAB-separated?)");
+            throw std::runtime_error("Invalid format of "+filename+". (Do lines have ID and are they comma-separated?)");
         }
     }
 

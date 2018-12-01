@@ -25,6 +25,9 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
     results.perClusterSilhouette.reserve(k);
     for (int i=0; i<k; i++) results.perClusterSilhouette.push_back(0);
 
+    results.averageSilhouette = 0;
+
+
 
     int i = 0;
     for (auto &item : X){
@@ -57,13 +60,14 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
 
             double s_i = (b_i - a_i) / std::max(a_i, b_i);
             results.perClusterSilhouette[best_cluster_index] += s_i;
+            results.averageSilhouette += s_i / X.size();
 
         }else{
             //TODO: write code here
         }
         i++;
     }
-
+/*
     results.averageSilhouette = 0;
     int zero_sized_clusters = 0;
     for (int i=0; i<k; i++){
@@ -77,7 +81,7 @@ SilhouetteResults compute_silhouettes(Dataset& X, std::vector<Cluster>& final_cl
         }
 
     }
-    results.averageSilhouette /= k;
+    results.averageSilhouette /= k;*/
 
     return results;
 }

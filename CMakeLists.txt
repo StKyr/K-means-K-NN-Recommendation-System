@@ -3,7 +3,7 @@ project(ergasia2)
 
 set(CMAKE_CXX_STANDARD 11)
 
-include_directories(include)
+include_directories(include libs/boost_1_67_0/stage/lib)
 
 add_executable(ergasia2
         include/ApproximateNeighborSearch/AbstractSimilaritySearch.h
@@ -41,3 +41,7 @@ add_executable(ergasia2
 
 
 add_subdirectory(test)
+
+
+LINK_DIRECTORIES(libs/boost_1_67_0/stage/lib)
+target_link_libraries(ergasia2 libboost_program_options.so)

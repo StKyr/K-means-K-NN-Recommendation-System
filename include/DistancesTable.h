@@ -21,6 +21,7 @@ public:
     void initialize(size_t size, double (*distance_func)(NDVector&, NDVector&)=metrics::euclidean_distance);
     double distance(NDVector& p, NDVector& q);
     void print_stats();
+    void reset();
 
 
 

@@ -10,6 +10,7 @@ class Update{
 public:
     explicit Update() = default;
     virtual void operator ()(Dataset& X, std::vector<Cluster>& clusters) = 0;
+    virtual ~Update() = default;
 };
 
 

@@ -20,6 +20,7 @@ public:
     virtual bool should_stop(std::vector<Cluster>& clustering) = 0;
     virtual std::string what() = 0;
     virtual std::string state() = 0;
+    virtual ~Criterion() = default;
 
 protected:
     bool passive;
@@ -101,6 +102,7 @@ public:
     void add_criterion(Criterion* c) {criteria.emplace_back(c);};
     std::string what() {return message.str();}
     std::string state() override;
+    virtual ~CriteriaOrchestrator() override {for (auto c: criteria) delete c;}
 protected:
     std::vector<Criterion*> criteria;
     std::stringstream message;
@@ -111,7 +113,6 @@ protected:
 class OrCriteriaOrchestrator : public CriteriaOrchestrator{
 public:
     bool should_stop(std::vector<Cluster>& clustering)  override;
-
 };
 
 

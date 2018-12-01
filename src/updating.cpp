@@ -25,10 +25,10 @@ void KMeansUpdate::operator() (Dataset& X, std::vector<Cluster>& clusters){
 void PAMalaLloydUpdate::operator() (Dataset& X, std::vector<Cluster>& clusters) {
     //todo: implement counters to know how many distances you computed -- also do it in DistacesIndex
 
-flog("PAM::Update()");
+//flog("PAM::Update()");
     for (auto& C : clusters){
 
-flog("- Cluster "+str(C.get_centroid()));
+//flog("- Cluster "+str(C.get_centroid()));
 
 
         int ni = C.num_points();

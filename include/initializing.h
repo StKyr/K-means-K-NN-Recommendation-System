@@ -10,6 +10,7 @@
 class Initializer{
 public:
     virtual std::vector<Cluster> operator () (Dataset& X, int k) = 0;
+    virtual ~Initializer() = default;
 };
 
 
@@ -17,6 +18,7 @@ public:
 class RandomInitializer: public Initializer{
 public:
     std::vector<Cluster> operator () (Dataset& X, int k) override;
+
 };
 
 class KMeansPlusPlus : public Initializer{

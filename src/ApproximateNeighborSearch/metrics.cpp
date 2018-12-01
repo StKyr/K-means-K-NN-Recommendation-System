@@ -3,7 +3,7 @@
 
 double metrics::euclidean_distance(NDVector& v, NDVector& u){
     NDVector diff = v - u;
-    double d = diff.norm();
+    double d = diff.norm_sq();
     return d;
 }
 

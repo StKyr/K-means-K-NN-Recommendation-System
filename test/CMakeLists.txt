@@ -31,7 +31,7 @@ add_executable(runUnitTests dummyTest.cpp testNDVector.cpp
         test_assignments.cpp
         ../include/utils.hpp
         ../include/DistancesTable.h
-        ../src/DistancesTable.cpp)
+        ../src/DistancesTable.cpp misc.cpp)
 
 
 target_link_libraries(runUnitTests gtest gtest_main)

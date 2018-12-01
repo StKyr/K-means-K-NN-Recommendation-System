@@ -17,6 +17,7 @@ public:
                   NDVector(std::initializer_list<double> list);
     unsigned long dim     ()                                       const;
     double        norm    (unsigned long p=2)                      const;
+    double        norm_sq ()                                       const;
     double        dot     (const NDVector& rhs)                    const;
 
     long          getId   () const {return id;}

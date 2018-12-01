@@ -12,6 +12,14 @@ void DistancesTable::initialize(size_t size, double (*distance_func)(NDVector&, 
     //table[1][1] = 0; //todo: here for segfault -- remove
 }
 
+void DistancesTable::reset(){
+    for (int i=0; i<size; i++){
+        for (int j=0; j<size; j++){
+            table[i][j]=0;
+        }
+    }
+}
+
 
 double DistancesTable::distance(NDVector& p, NDVector& q){
     if (!dist) throw std::logic_error("unitialized distance table!");

@@ -1,4 +1,6 @@
 #include <DistancesTable.h>
+#include <utils.hpp>
+#include <cassert>
 #include "assigning.h"
 
 
@@ -44,6 +46,38 @@ void LloydAssignment::operator() (Dataset& X, std::vector<Cluster>& clusters){
 }
 
 
+double min_dist_between_clusters(std::vector<Cluster>& clusters){
+
+    double min_dist = std::numeric_limits<double>::max();
+
+    for (int i=0; i<clusters.size(); i++){
+        for (int j=0; j<clusters.size(); j++){
+            auto c1 = clusters[i].get_centroid();
+            auto c2 = clusters[j].get_centroid();
+            double d = DistancesTable::getInstance().distance(c1,c2);
+            if (d) d = std::min(d, min_dist);
+        }
+    }
+    return min_dist;
+}
+
+
+double average_dist_between_clusters(std::vector<Cluster>& clusters){
+
+    double avg_dist = 0;
+
+    for (int i=0; i<clusters.size(); i++){
+        for (int j=0; j<clusters.size(); j++){
+            auto c1 = clusters[i].get_centroid();
+            auto c2 = clusters[j].get_centroid();
+            double d = DistancesTable::getInstance().distance(c1,c2);
+
+            avg_dist += d / clusters.size();
+        }
+    }
+    return avg_dist;
+}
+
 
 
 
@@ -75,18 +109,32 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
      */
 
     typedef std::pair<int, double> NearestCenterInfo;
-    std::unordered_map<std::string,NearestCenterInfo> nearestCenters;                                                   // 1.
+    //std::unordered_map<std::string,NearestCenterInfo> assignmentTable;                                                   // 1.
+    NearestCenterInfo assignmentTable[X.size()];
+    for (int i=0; i<X.size(); i++) assignmentTable[i] = std::make_pair(-1,-1);
 
     auto k = clusters.size();
+
+    size_t num_stored = 0;
+    size_t num_collision = 0;
+
+    size_t total_points_recieved = 0;
 
     for (int i=0; i<k; i++){                                                                                            // 2.
 
         std::set<std::string> nearby_points_to_centre = this-> searchIndex.retrieveNeighbors(clusters[i].get_centroid());       // 3.
+
+        total_points_recieved += nearby_points_to_centre.size();
+
         for (auto &vectorId : nearby_points_to_centre){                                                                 // 4.
 
-            if (nearestCenters.find(vectorId) == nearestCenters.end()){                                                 // 4a.
-                //double d = DistancesTable::getInstance().distance(X[vectorId], clusters[i].get_centroid());
-                nearestCenters[vectorId] = std::make_pair(i,-1.0);
+
+            //if (assignmentTable.find(vectorId) == assignmentTable.end()){                                                 // 4a.
+            if (assignmentTable[X[vectorId].getId()].first == -1){
+                double d = DistancesTable::getInstance().distance(X[vectorId], clusters[i].get_centroid());
+                assignmentTable[X[vectorId].getId()] = std::make_pair(i, d);
+
+                num_stored++;
 
             }else {
                 NDVector &p = X[vectorId];
@@ -94,24 +142,28 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
 
                 double dist_curr = DistancesTable::getInstance().distance(p, c_curr);
 
-                if (nearestCenters[vectorId].second == -1) {                                                            // 4b.
-                    int i_prev = nearestCenters[vectorId].first;
+                if (assignmentTable[X[vectorId].getId()].second == -1) {                                                            // 4b.
+assert(false);
+                    int i_prev = assignmentTable[X[vectorId].getId()].first;
                     NDVector &c_prev = clusters[i_prev].get_centroid();
                     double dist_prev = DistancesTable::getInstance().distance(p, c_prev);
 
-                    if (dist_curr < dist_prev) nearestCenters[vectorId] = std::make_pair(i, dist_curr);
-                    else                       nearestCenters[vectorId] = std::make_pair(i_prev, dist_prev);
+                    if (dist_curr < dist_prev) assignmentTable[X[vectorId].getId()] = std::make_pair(i, dist_curr);
+                    else                       assignmentTable[X[vectorId].getId()] = std::make_pair(i_prev, dist_prev);
 
                 } else {                                                                                                // 4c.
-                    if (dist_curr < nearestCenters[vectorId].second){
-                        nearestCenters[vectorId] = std::make_pair(i, dist_curr);
+                    if (dist_curr < assignmentTable[X[vectorId].getId()].second){
+                        assignmentTable[X[vectorId].getId()] = std::make_pair(i, dist_curr);
                     }
                 }
+
+                num_collision++;
             }
         }
     }
 
-    std::vector<NDVector> all_centres(k);
+    std::vector<NDVector> all_centres;
+    all_centres.reserve(k);
 
     for (int i=0; i<k; i++){    // order not guaranteed in for each loop
         auto &C = clusters[i];
@@ -119,17 +171,44 @@ void ReverseANNAssignment::operator() (Dataset& X, std::vector<Cluster>& cluster
         all_centres.push_back(C.get_centroid());
     }
 
+
+
+    //range_assigment(clusters, assignmentTable, X.size());
+
+    double proximity_threshold = average_dist_between_clusters(clusters) / 16;
+
+
+    size_t num_missed=0;
+    size_t num_no_collisions=0;
     for (auto &x: X){                                                                                                   // 5.
         int cluster_index;
 
-        if (nearestCenters.find(x.first) != nearestCenters.end()){                                                      // 5a.
-            cluster_index = nearestCenters[x.first].first;
+        //if (assignmentTable.find(x.first) != assignmentTable.end()){                                                      // 5a.
+        if (assignmentTable[X[x.first].getId()].first != -1){
+            //if (assignmentTable[X[x.first].getId()].second==-1)num_no_collisions++;
+
+            if (assignmentTable[X[x.first].getId()].second <= proximity_threshold){
+                cluster_index = assignmentTable[X[x.first].getId()].first;
+            }else{
+                num_missed++;
+                cluster_index = single_assignment(x.second, all_centres);
+            }
 
         }else{                                                                                                          // 5b.
+            num_missed++;
             cluster_index = single_assignment(x.second, all_centres);
         }
 
         Cluster& C = clusters[cluster_index];
         C.assign(x.first);
     }
+
+    float d1 = ((float)num_collision + k*num_missed) /(X.size()*k)*100;
+    float d2 = (float)num_no_collisions/X.size()*100;
+    float d3 = (float)num_missed/X.size()*100;
+    flog("Computed "+str(d1)+"% of distances | Assigned directly "+str(d2)+"% of points | Searched "+str(d3)+"% points exhaustively");
+
+/*   flog("Total points retrieved: "+str(total_points_recieved)+
+    " | Distinct points retrieved: "+str(num_stored)+
+    "| Collisions: "+str(num_collision)+"| Points searched exhaustively: "+str(num_missed));*/
 }
