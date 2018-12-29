@@ -40,7 +40,7 @@ if (++__cnt % 1000 == 0 || (__cnt > 4000 && __cnt % 100 == 0)) std::cerr << "Par
                     this->tweets[tweetId] = tokensList;
                 }catch (std::exception &e){ // possible '\r' character before new line
                     if (token != "\r"){
-std::cerr << "Exception "<<std::endl;
+//std::cerr << "Exception "<<std::endl;
                         throw e;
                     }
                 }
@@ -50,7 +50,7 @@ std::cerr << "Exception "<<std::endl;
         }
 
         fin.close();
-std::cerr << "Parsed dataset - "<<__cnt<<" tweets"<<std::endl;
+//std::cerr << "Parsed dataset - "<<__cnt<<" tweets"<<std::endl;
     }
 
     std::vector<TokensList> getUserTweets(std::string userId) {
