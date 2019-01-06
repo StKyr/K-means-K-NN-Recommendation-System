@@ -33,7 +33,6 @@ std::unordered_map<std::string, double>* computeAverageScores(Dataset &X){
     return averages;
 }
 
-Dataset *
 
 
 NDVector normalize(NDVector &v){ //todo: normalize elsewhere

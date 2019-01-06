@@ -6,6 +6,7 @@
 #include "../include/ApproximateNeighborSearch/VectorCSVReader.h"
 #include "../include/clustering/clustering.h"
 #include "../include/recommendations.hpp"
+#include "../include/UserVectors.hpp"
 
 
 namespace  Params{
@@ -42,7 +43,12 @@ int main() {
     Dataset         *U2 = filterOutZeros(*U);
     Dataset         *U_normalized = normalizeDataset(*U2);
 
-//    printUsers(*U_normalized, K);
+    UserVectorDataset uvd(T, A, K);
+    uvd.filterOutZeros();
+    uvd.subtract_average();
+
+
+   printUsers(*U_normalized, K);
 
 /*    auto             clusters = vectorizedDatasetClustering(X, Params::K);
     Dataset         *C = createCentroidsVectors(clusters, T, A, K);*/

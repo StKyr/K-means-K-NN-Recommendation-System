@@ -10,7 +10,7 @@
 #include "ApproximateNeighborSearch/CosineSimilarityLSH.h"
 #include "ApproximateNeighborSearch/VectorCSVReader.h"
 #include "ApproximateNeighborSearch/NearestNeighborSearch.h"
-#include "clustering/kmeans.hpp"
+
 
 class ProximitySearch {
 public:
@@ -31,7 +31,7 @@ private:
 };
 
 
-class ClusteringProximitySearch : public ProximitySearch {
+/*class ClusteringProximitySearch : public ProximitySearch {
 public:
     std::vector<std::pair<std::string, double>> operator() (NDVector &p) override;
 
@@ -53,7 +53,7 @@ std::vector<std::pair<std::string, double>> ClusteringProximitySearch::operator(
     for (auto &id: this->clusters[this->index[   ]])
 
 
-}
+}*/
 
 
 
