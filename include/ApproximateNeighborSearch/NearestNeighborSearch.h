@@ -27,4 +27,7 @@ std::pair<std::string, double>  nearestNeighbor(NDVector& q, std::unordered_map<
 std::vector<std::string> range_nearestNeighbors(NDVector& q, double R, std::unordered_map<std::string, NDVector>& X,
         double (*dist)(NDVector&, NDVector&) );
 
+
+std::vector<std::pair<std::string,double>> k_nearestNeighbors(int k, NDVector& q,
+        std::unordered_map<std::string, NDVector> &X, double (*dist)(NDVector&, NDVector&));
 #endif //ERGASIA1_NEARESTNEIGHBORSEARCH_H

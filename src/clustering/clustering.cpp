@@ -3,6 +3,7 @@
 #include "../../include/Datasets.hpp"
 #include "../../include/clustering/kmeans.hpp"
 #include "../../include/clustering/clustering.h"
+#include "../../include/clustering/DistancesTable.h"
 
 
 std::vector<Cluster> vectorizedDatasetClustering(TfidfDataset &X, int K){
@@ -13,6 +14,9 @@ std::vector<Cluster> vectorizedDatasetClustering(TfidfDataset &X, int K){
     or1->add_criterion(c1);
     or1->add_criterion(c3);
     or1->add_criterion(c4);
+
+    DistancesTable::getInstance().reset();
+    DistancesTable::getInstance().initialize(X.dataset.size(), metrics::euclidean_distance);
 
     KMeansParams params;
     params.initialize         = new KMeansPlusPlus(),

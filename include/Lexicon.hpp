@@ -45,43 +45,15 @@ private:
 
 class CryptoLexicon {
 public:
-    explicit CryptoLexicon(std::string fileName, char del=','){
-        std::ifstream fin;
-        std::string line, abbr, crypto;
-
-        int i=0;
-        fin.open(fileName);
-        if (fin.is_open()){
-
-            while(getline(fin, line)){
-                std::stringstream ss(line);
-                getline(ss, crypto, del);
-                this->cryptos.push_back(crypto);
-                this->abbreviations[crypto] = i;
-                while(getline(ss, abbr, del)){
-                    this->abbreviations[abbr] = i;
-                }
-                i++;
-            }
-        }else{
-            throw std::runtime_error(fileName+" not found.");
-        }
-        fin.close();
-    }
-
-    std::vector<bool> createCryptoVector(std::vector<std::string>& tweet){
-        std::vector<bool> cryptoVector(this->cryptos.size(), false);
-        for (auto& token: tweet){
-            if (this->abbreviations.find(token) != this->abbreviations.end()){
-                cryptoVector.at(this->abbreviations[token]) = true;
-            }
-        }
-        return cryptoVector;
-    }
-
-    std::string getCrypto(int index){
-        return this->cryptos[index];
-    }
+    explicit CryptoLexicon(std::string fileName, char del=',');
+    std::vector<double> createCryptoVector(std::vector<std::string>& tweet);
+    std::vector<bool> createBoolVector(std::vector<std::string>& tweet);
+    bool exists(const std::string word);
+    bool exists(const char* word);
+    std::string getCrypto(int index);
+    std::string say_hi();
+    void print();
+    int dim(){return cryptos.size();}
 private:
     std::vector<std::string> cryptos;
     std::unordered_map<std::string, int> abbreviations;

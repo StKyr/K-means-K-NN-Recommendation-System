@@ -47,7 +47,12 @@ add_executable(ergasia3
         include/Lexicon.hpp
         include/Datasets.hpp
 
-        include/analysis.cpp
-        include/analysis.hpp
+        src/preprocessing.cpp
+        include/preprocessing.hpp
         src/clustering/clustering.cpp
-        include/clustering/clustering.h)
+        include/clustering/clustering.h
+        src/DatasetStructures.cpp
+        src/recommendations.cpp
+        include/recommendations.hpp
+        src/ProximitySearch.cpp
+        include/ProximitySearch.hpp include/UserVectors.cpp include/UserVectors.hpp)

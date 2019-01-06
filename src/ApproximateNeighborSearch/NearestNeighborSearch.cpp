@@ -1,6 +1,8 @@
 #include <list>
 #include <iostream>
 #include <csignal>
+#include <forward_list>
+#include <cassert>
 #include "../../include/ApproximateNeighborSearch/NearestNeighborSearch.h"
 
 
@@ -48,4 +50,32 @@ std::vector<std::string> range_nearestNeighbors(NDVector& q, double R, std::unor
         }
     }
     return nearbyIds;
+}
+
+std::vector<std::pair<std::string,double>> k_nearestNeighbors(int k, NDVector& q, std::unordered_map<std::string, NDVector> &X, double (*dist)(NDVector&, NDVector&)){
+
+    //std::forward_list<std::pair<std::string, double>> neighbors;
+
+
+    std::vector<std::pair<std::string,double>> neighbors;
+    neighbors.reserve(X.size());
+
+    for (auto &item: X){
+        double d = dist(item.second, q);
+        neighbors.emplace_back(std::make_pair(item.first, d));
+    }
+
+    std::sort(neighbors.begin(), neighbors.end());
+
+    assert(neighbors[0].second != std::numeric_limits<double>::infinity());
+
+    auto it = neighbors.begin();
+
+    if (k< X.size()){
+        std::advance(it, k);
+    }else{
+        it = neighbors.end();
+    }
+
+    return std::vector<std::pair<std::string,double>>(neighbors.begin(), it);
 }

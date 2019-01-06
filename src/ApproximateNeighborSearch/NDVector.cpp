@@ -192,3 +192,9 @@ std::string NDVector::toString() const{
     return ss.str();
 }
 
+
+bool NDVector::operator==(const NDVector &rhs) const {
+    if (this->dim() != rhs.dim()) throw std::logic_error("Equality of vectors of different dimensions");
+    for (int i=0; i<this->dim(); i++) if (this->coords[i] != rhs.coords[i]) return false;
+    return true;
+}

@@ -13,7 +13,8 @@
 
 Dataset *createUsersVectors(TokenizedDataset& T, SentimentLexicon& A, CryptoLexicon& K);
 Dataset *createCentroidsVectors(std::vector<Cluster>& clusters, TokenizedDataset& T, SentimentLexicon& A, CryptoLexicon& K);
-
+Dataset *normalizeDataset(Dataset &X);
+Dataset * filterOutZeros(Dataset &X);
 
 
 

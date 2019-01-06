@@ -24,7 +24,7 @@ public:
 
     NDVector&     operator =  (const NDVector& rhs) = default;
     NDVector&     operator =  (std::initializer_list<double> list);
-    inline bool   operator == (const NDVector& rhs)       const          {return this->coords == rhs.coords; }
+           bool   operator == (const NDVector& rhs)       const;
     inline bool   operator != (const NDVector& rhs)                {return ! (*this == rhs);}
 
     inline bool   operator <  (const NDVector& rhs)       const    {return this->coords < rhs.coords;}//{throw std::logic_error("Nonsensical vector comparison");}
