@@ -7,6 +7,7 @@
 #include "../include/Lexicon.hpp"
 #include "../include/ApproximateNeighborSearch/NearestNeighborSearch.h"
 #include "../include/ProximitySearch.hpp"
+#include "../include/UserVectors.hpp"
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
@@ -121,12 +122,12 @@ std::vector<std::vector<std::string>> userBasedSuggestions(int num, Dataset &U, 
             //lsh = &lsh2;
             dataset = &U_normed_non_zero;
             vector = &(U_normed_non_zero[it.first]);
-            nearest_neighbors = searchNormalized(U_normed_non_zero[it.first]);
+            nearest_neighbors = searchNormalized("",U_normed_non_zero[it.first]);
         }else{                                            // a 0 vector
             //lsh = &lsh1;
             dataset = &U;
             vector = &(U[it.first]);
-            nearest_neighbors = searchOriginal(U[it.first]);
+            nearest_neighbors = searchOriginal("",U[it.first]);
         }
 /*
         neighbors = lsh->retrieveNeighbors(*vector);
@@ -157,6 +158,65 @@ std::cout<<std::endl;
     }
     return results;
 }
+
+std::vector<std::pair<double,int>> rate(const std::string &userId, NDVector &u,
+        std::vector<std::pair<std::string, double>>& neighbors, UserVectorDataset &dataset){
+
+    std::vector<std::pair<double,int>> ratings;
+
+    for (int i=0; i<u.dim(); i++){
+
+        if (dataset.cryptoMentions[userId][i]) continue;
+
+
+        double R=0;
+        for (auto &pair: neighbors) {
+            double sim = 1-pair.second;
+            NDVector v = dataset.U[pair.first];
+            double r = v[i];
+            R += sim*(r-dataset.averages[pair.first]);
+        }
+        ratings.emplace_back(std::make_pair(R,i));
+    }
+
+    return ratings;
+}
+
+
+
+std::vector<std::vector<std::string>> userBasedSuggestions(int num, UserVectorDataset &dataset, int P, CryptoLexicon &K){
+
+    std::vector<std::vector<std::string>> results;
+
+    std::set<std::string>                       neighbors;
+    std::vector<std::pair<std::string, double>> nearest_neighbors;
+    std::vector<std::pair<double,int>>          ratings;
+    std::vector<std::string>                    userResults;
+    Dataset neighborVectors;
+
+    NearesrNeighborProximitySearch search(P, dataset.U);
+
+    for (auto& item: dataset.U){
+
+        nearest_neighbors = search(item.first, item.second);
+        ratings = rate(item.first, item.second, nearest_neighbors, dataset);
+        std::sort(ratings.begin(), ratings.end(), compareDesc);
+        userResults.clear();
+        for (int i=0; i<num; i++) userResults.push_back(K.getCrypto(ratings[i].second));
+        results.push_back(userResults);
+
+
+
+std::cout << "User " << item.first << ": {" << nearest_neighbors.size() << " similar users, mentioned cryptos:\t";
+for (int i=0; i<dataset.dim(); i++) if (dataset.cryptoMentions[item.first][i]) std::cout<<K.getCrypto(i)<<"\t";
+std::cout<<"} ------->\t";
+for (int i=0; i<num; i++) std::cout<<K.getCrypto(ratings[i].second)<<"("<<ratings[i].first<<")\t";
+std::cout<<std::endl;
+    }
+
+    return results;
+}
+
 
 
 

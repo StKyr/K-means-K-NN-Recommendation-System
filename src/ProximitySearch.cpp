@@ -8,7 +8,7 @@ NearesrNeighborProximitySearch::NearesrNeighborProximitySearch(int P, Dataset& X
 }
 
 
-std::vector<std::pair<std::string, double>> NearesrNeighborProximitySearch::operator() (NDVector &p){
+std::vector<std::pair<std::string, double>> NearesrNeighborProximitySearch::operator() (std::string id, NDVector &p){
 
     Dataset neighborVectors;
     std::set<std::string> nearestNeighbors;

@@ -57,8 +57,10 @@ int main() {
 
     std::vector<std::vector<std::string>> suggestions;
 
-    suggestions = userBasedSuggestions(5, *U2, *U_normalized, Params::P, K);
-    printSuggestions(suggestions, *U, "P-range Neighbor Search of U");
+
+    suggestions = userBasedSuggestions(5,uvd, Params::P, K);
+ //   suggestions = userBasedSuggestions(5, *U2, *U_normalized, Params::P, K);
+//    printSuggestions(suggestions, *U, "P-range Neighbor Search of U");
 
 /*
     suggestions = userBasedSuggestions(2, U, "kmeans", Params::K);

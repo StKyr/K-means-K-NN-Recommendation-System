@@ -13,6 +13,7 @@ public:
     UserVectorDataset(TokenizedDataset& T, SentimentLexicon& A, CryptoLexicon& K);
     void filterOutZeros();
     void subtract_average();
+    size_t dim() {return U.begin()->second.dim();}
 
     Dataset U;
     Dataset U_fixed;
