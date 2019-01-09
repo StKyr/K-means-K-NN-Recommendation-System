@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <getopt.h>
+#include <chrono>
 #include "../include/Lexicon.hpp"
 #include "../include/Datasets.hpp"
 #include "../include/preprocessing.hpp"
@@ -20,15 +21,28 @@ namespace InputArguments{
 
 
 
-void printSuggestions(std::vector<std::vector<std::string>> &suggestions, Dataset &U, std::string algorithm, std::string outputFilename){
-    std::cout << "Method: "<<algorithm<<std::endl;
-    int i=0;
-    for (auto &item: U){
-        std::cout << "User: "<<item.first<<" | ";
-        for (auto &crypto: suggestions[i]){
-            std::cout << crypto << ", ";
+void printSuggestions(std::vector<std::vector<std::string>> &suggestions, Dataset &U, std::string algorithm, std::string outputFilename, long time, bool delete_previous=false){
+
+    std::ofstream fout;
+
+    if (delete_previous) fout.open(outputFilename, std::ios::out | std::ios::trunc);
+    else                 fout.open(outputFilename, std::ios::out | std::ios::app);
+
+    if (fout.is_open()) {
+        fout << algorithm << std::endl;
+        int i = 0;
+        for (auto &item: U) {
+            fout << item.first << "\t";
+            for (auto &crypto: suggestions[i]) {
+                fout << crypto << "\t";
+            }
+            fout << std::endl;
         }
-        std::cout<<std::endl;
+        fout << "Execution Tie: " << time << std::endl;
+        fout << std::endl;
+        fout.close();
+    }else{
+        throw std::runtime_error("Error opening output file");
     }
 }
 
@@ -41,6 +55,7 @@ int main(int argc, char* argv[]) {
     parse_config_params("./config");
 
     TokenizedDataset T(InputArguments::inputFilename,'\t');
+    if (! HyperParams::P) HyperParams::P = T.P;
     TfidfDataset     X(HyperParams::tfidf_dataset,',');
     SentimentLexicon A(HyperParams::lexicon_file,'\t');
     CryptoLexicon    K(HyperParams::cryptos_file,'\t');
@@ -51,27 +66,57 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::vector<std::string>> suggestions;
 
-    Evaluation evaluation;
+    Evaluation *evaluation;
 
-//    std::cout<<"\n\n\n-------------------------- 1 ----------------------------\n\n"<<std::endl;
-//    suggestions = recommend(5, users, HyperParams::P, K, nearest_neighbor, &evaluation);
-//    std::cout<<"\n\n\n-------------------------- 2 ----------------------------\n\n"<<std::endl;
-//    suggestions = recommend(5, users, Params::P, K, clustering, &evaluation);
+    std::cout<<"Read and parsed input files, created users and preprocessed them."<<std::endl;
+
+    // ------------------------------------------------- A --------------------------------------------//
+
+    // 1.A
+    evaluation = (HyperParams::validate) ? new Evaluation() : nullptr;
+    auto begin = std::chrono::steady_clock::now();
+    suggestions = recommend(5, users, HyperParams::P, K, nearest_neighbor, evaluation);
+    printSuggestions(suggestions, users.U, "Cosine LSH (amongst users)", InputArguments::outputFilename,
+                     std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - begin).count(), true);
+    if (HyperParams::validate) std::cout<<"Cosine LSH Recommendation MAE (amongst users): "<<evaluation->getMAE()<<std::endl;
+    delete evaluation;
+
+    // 2.A
+    evaluation = (HyperParams::validate) ? new Evaluation() : nullptr;
+    begin = std::chrono::steady_clock::now();
+    suggestions = recommend(5, users, HyperParams::P, K, clustering, evaluation);
+    printSuggestions(suggestions, users.U, "Clustering (amongst users)", InputArguments::outputFilename,
+                     std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - begin).count());
+    if (HyperParams::validate) std::cout<<"Clustering Recommendation MAE (amongst users): "<<evaluation->getMAE()<<std::endl;
+    delete evaluation;
 
 
+     // ---------------------------------------------------- B --------------------------------------//
+    auto clusters = vectorizedDatasetClustering(X, HyperParams::K_tweets);
+    VirtualUserVectorDataset virtualUsers(clusters, T, A, K);
+    virtualUsers.filterOutZeros();
+    virtualUsers.subtract_average();
 
-//    auto clusters = vectorizedDatasetClustering(X, 200);
-//    VirtualUserVectorDataset virtualUsers(clusters, T, A, K);
-//    virtualUsers.filterOutZeros();
-//    virtualUsers.subtract_average();
+    std::cout<<"Created virtual users and preprocessed them." << std::endl;
 
-//    std::cout<<"\n\n\n-------------------------- 3 ----------------------------\n\n"<<std::endl;
-//    suggestions = recommend(2, users, virtualUsers, Params::P, K, nearest_neighbor, &evaluation);
-//    std::cout<<"\n\n\n-------------------------- 4  ----------------------------\n\n"<<std::endl;
-//    suggestions = recommend(2, users, virtualUsers, Params::P, K, clustering, &evaluation);
+    // 1.B
+    evaluation = (HyperParams::validate) ? new Evaluation() : nullptr;
+    begin = std::chrono::steady_clock::now();
+    suggestions = recommend(2, users, virtualUsers, HyperParams::P, K, nearest_neighbor, evaluation);
+    printSuggestions(suggestions, users.U, "Cosine LSH (amongst virtual users)", InputArguments::outputFilename,
+                     std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - begin).count());
+    if (HyperParams::validate) std::cout<<"Cosine LSH Recommendation MAE (amongst virtual users): "<<evaluation->getMAE()<<std::endl;
+    delete evaluation;
 
 
-    std::cout<<evaluation.getMAE()<<std::endl;
+    // 2.B
+    evaluation = (HyperParams::validate) ? new Evaluation() : nullptr;
+    begin = std::chrono::steady_clock::now();
+    suggestions = recommend(2, users, virtualUsers, HyperParams::P, K, clustering, evaluation);
+    printSuggestions(suggestions, users.U, "Clustering (amongst virtual users)", InputArguments::outputFilename,
+                     std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - begin).count());
+    if (HyperParams::validate) std::cout<<"Clustering Recommendation MAE (amongst virtual users): "<<evaluation->getMAE()<<std::endl;
+    delete evaluation;
 
     return 0;
 }
@@ -139,6 +184,7 @@ void parseCommandLineArguments(int argc, char* argv[]){
     }
 
     if (validate) InputArguments::validate = true;
+    if (validate) HyperParams::validate = true;
 }
 
 

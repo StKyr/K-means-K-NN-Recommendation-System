@@ -16,8 +16,9 @@ namespace HyperParams{
     extern std::string cryptos_file;
     extern std::string lexicon_file;
     extern std::string tfidf_dataset;
-
     extern int sample;
+
+    extern bool validate;
 };
 
 void parse_config_params(std::string config_filename);

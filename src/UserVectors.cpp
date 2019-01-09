@@ -66,20 +66,20 @@ std::pair<std::string, NDVector> UserVectorDataset::createSentimentVector(std::s
 
 
 void UserVectorDataset::filterOutZeros() {
-int __cnt=0;
     static NDVector zero = NDVector::zero_vector(this->U.begin()->second.dim());
+
+    Dataset newU;
+
     std::unordered_map<UserId, NDVector>::iterator it;
     for (it=this->U.begin(); it != this->U.end(); ){
-        if (it->second == zero){
-            this->cryptoMentions.erase(it->first);
-            this->averages.erase(it->first);
-            it = this->U.erase(it);
-__cnt++;
+        if (it->second != zero){
+            newU[it->first] = it->second;
         }else{
-            it++;
         }
+        it++;
+
     }
-std::cerr<<"Found "<<__cnt<<" empty vectors"<<std::endl;
+    this->U = newU;
 }
 
 void UserVectorDataset::subtract_average() {

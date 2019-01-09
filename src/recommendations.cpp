@@ -8,6 +8,7 @@
 #include "../include/ApproximateNeighborSearch/NearestNeighborSearch.h"
 #include "../include/ProximitySearch.hpp"
 #include "../include/UserVectors.hpp"
+#include "../include/parameters.hpp"
 
 bool compareDesc(std::pair<double, int> first, std::pair<double, int> second){
     if (first.first == NAN || first.first == -NAN ) return false;
@@ -72,7 +73,7 @@ std::vector<std::vector<std::string>> userBasedSuggestions(int num,
     std::vector<std::pair<double,int>>          ratings;
     std::vector<std::string>                    userResults;
     Dataset neighborVectors;
-
+    int cnt = 0;
     bool shouldEvaluate = evaluation != nullptr;
 
 
@@ -89,21 +90,16 @@ std::vector<std::vector<std::string>> userBasedSuggestions(int num,
         evaluation->ratings_function = rate;
     }
 
-
-
-int __cnt = 0;
-
     for (auto& item: users.U){
 
-
-//if (__cnt++ == 100) return results;
+        if (HyperParams::sample && cnt++ == HyperParams::sample) break;
 
 
         nearest_neighbors = (*search)(item.first, item.second);
         ratings = rate(item.first, item.second, users.cryptoMentions[item.first], nearest_neighbors, *suggestionDataset);
         std::sort(ratings.begin(), ratings.end(), compareDesc);
         userResults.clear();
-        for (int i=0; i<num; i++) userResults.push_back(K.getCrypto(ratings[i].second));
+        for (int i=0; i<num && i<ratings.size(); i++) if (ratings[i].first>0) userResults.push_back(K.getCrypto(ratings[i].second));
         results.push_back(userResults);
 
 
@@ -111,7 +107,7 @@ int __cnt = 0;
 //std::cout << "User " << item.first << ": {" << nearest_neighbors.size() << " similar users, mentioned cryptos:\t";
 //for (int i=0; i<users.dim(); i++) if (users.cryptoMentions[item.first][i]) std::cout<<K.getCrypto(i)<<"\t";
 //std::cout<<"} ------->\t";
-//for (int i=0; i<num; i++) std::cout<<K.getCrypto(ratings[i].second)<<"("<<ratings[i].first<<")\t";
+//for (int i=0; i<num && i<userResults.size(); i++) std::cout<<userResults[i]<<"("<<ratings[i].first<<")\t";
 //std::cout<<std::endl;
 
 

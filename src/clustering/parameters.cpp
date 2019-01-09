@@ -11,7 +11,7 @@ namespace HyperParams{
     size_t k_LSH = 2;
     size_t L_LSH = 3;
 
-    int P;
+    int P=0;
 
     int K_tweets = 150;
     int K_Cj=0;
@@ -20,6 +20,7 @@ namespace HyperParams{
     std::string tfidf_dataset = "../input/twitter_dataset_small_v2.csv";
 
     int sample=0;
+    bool validate=false;
 };
 
 

@@ -7,6 +7,7 @@
 #include <map>
 #include <iostream>
 #include "ApproximateNeighborSearch/NDVector.h"
+#include "utils.hpp"
 #include <algorithm>
 
 typedef std::vector<std::string> TokensList;
@@ -16,11 +17,16 @@ public:
 
     explicit TokenizedDataset(std::string fileName, char del=','){
         std::ifstream fin;
-        std::string line, userId, tweetId, token;
+        std::string line, userId, tweetId, token, P_str, _;
 
 
         fin.open(fileName);
         if (fin.is_open()){
+            fin >> _;
+            fin >> P_str;
+            this->P = str_convert<int>(trim(P_str));
+
+
             while (getline(fin, line)){
 
                 std::stringstream ss(line);
@@ -87,6 +93,8 @@ public:
         }
         return users;
     }
+
+    int P;
 private:
     //std::multimap<std::string, std::string> userTweets;
     std::unordered_map<std::string, std::vector<std::string>> userTweets;

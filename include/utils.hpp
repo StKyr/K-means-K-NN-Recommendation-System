@@ -36,7 +36,7 @@ void flog(T message) {std::cout <<message <<std::endl;}
 
 
 template <typename T>
-T str_convert(std::string& value) {std::stringstream ss(value); T t; ss>>t; return t;}
+T str_convert(std::string value) {std::stringstream ss(value); T t; ss>>t; return t;}
 
 
 

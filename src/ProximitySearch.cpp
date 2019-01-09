@@ -1,8 +1,9 @@
 #include "../include/ProximitySearch.hpp"
+#include "../include/parameters.hpp"
 
 
 NearesrNeighborProximitySearch::NearesrNeighborProximitySearch(int P, Dataset& X, double (*dist)(NDVector &, NDVector &))
-        :P(P), dist(dist), lsh(2,2,X.begin()->second.dim()), dataset(X) {
+        :P(P), dist(dist), lsh(HyperParams::L_LSH, HyperParams::k_LSH, X.begin()->second.dim()), dataset(X) {
 
     lsh.insertDataset(X);
 }
@@ -26,7 +27,7 @@ std::vector<std::pair<std::string, double>> NearesrNeighborProximitySearch::oper
 
 void ClusteringProximitySearch::performClustering(){
 
-    int K = dataset.size() / P;
+    int K = (HyperParams::K_Cj>0) ? HyperParams::K_Cj : HyperParams::K_tweets/HyperParams::P;
 
     static KMeansParams params;
     Criterion *c1 = new IteratorCounter(30);
