@@ -55,4 +55,4 @@ add_executable(ergasia3
         src/recommendations.cpp
         include/recommendations.hpp
         src/ProximitySearch.cpp
-        include/ProximitySearch.hpp include/UserVectors.cpp include/UserVectors.hpp)
+        include/ProximitySearch.hpp src/UserVectors.cpp include/UserVectors.hpp src/Evaluation.cpp include/Evaluation.hpp)

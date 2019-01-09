@@ -40,6 +40,7 @@ public:
     NDVector&     operator *= (double l);
 
     const double  operator [] (int i)                              const;
+          double &operator [] (int i);
   //std::ostream& operator << (std::ostream& os, NDVector& rhs);   // Non class member function - see below
     std::string   toString    ()                                   const;
 

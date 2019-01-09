@@ -154,6 +154,16 @@ const double   NDVector::operator [] (int i) const{
     return this->coords[i];
 }
 
+double& NDVector::operator [] (int i){
+    if (i<0 || i>= this->dim()) {
+        std::stringstream stringstream = std::stringstream();
+        stringstream << "Invalid subscript index: " << i << " (dimension is: " << this->dim() <<")";
+        throw std::range_error(stringstream.str());
+    }
+
+    return this->coords[i];
+}
+
 
 
 std::ostream& operator << (std::ostream& os, NDVector& rhs)

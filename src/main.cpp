@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <getopt.h>
 #include "../include/Lexicon.hpp"
 #include "../include/Datasets.hpp"
 #include "../include/preprocessing.hpp"
@@ -7,20 +8,19 @@
 #include "../include/clustering/clustering.h"
 #include "../include/recommendations.hpp"
 #include "../include/UserVectors.hpp"
-
-
-namespace  Params{
-    int P=20;
-    int K=200;
-    std::string cryptos_file="../input/coins_queries.csv";
-    std::string lexicon_file="../input/vader_lexicon.csv";
-    std::string tweets_file="../input/tweets_dataset_small.csv";
-    std::string input_file ="../input/twitter_dataset_small_v2.csv";
-}
+#include "../include/parameters.hpp"
 
 
 
-void printSuggestions(std::vector<std::vector<std::string>> &suggestions, Dataset &U, std::string algorithm){
+namespace InputArguments{
+    std::string inputFilename;
+    std::string outputFilename;
+    bool validate = false;
+};
+
+
+
+void printSuggestions(std::vector<std::vector<std::string>> &suggestions, Dataset &U, std::string algorithm, std::string outputFilename){
     std::cout << "Method: "<<algorithm<<std::endl;
     int i=0;
     for (auto &item: U){
@@ -33,39 +33,45 @@ void printSuggestions(std::vector<std::vector<std::string>> &suggestions, Datase
 }
 
 void printUsers(Dataset &U, CryptoLexicon &K);
-
-int main() {
-    TokenizedDataset T(Params::tweets_file,'\t');
-    TfidfDataset     X(Params::input_file,',');
-    SentimentLexicon A(Params::lexicon_file,'\t');
-    CryptoLexicon    K(Params::cryptos_file,'\t');
-    Dataset         *U = createUsersVectors(T, A, K);
-    Dataset         *U2 = filterOutZeros(*U);
-    Dataset         *U_normalized = normalizeDataset(*U2);
-
-    UserVectorDataset uvd(T, A, K);
-    uvd.filterOutZeros();
-    uvd.subtract_average();
+void parseCommandLineArguments(int argc, char* argv[]);
 
 
-   printUsers(*U_normalized, K);
+int main(int argc, char* argv[]) {
+    parseCommandLineArguments(argc, argv);
+    parse_config_params("./config");
 
-/*    auto             clusters = vectorizedDatasetClustering(X, Params::K);
-    Dataset         *C = createCentroidsVectors(clusters, T, A, K);*/
+    TokenizedDataset T(InputArguments::inputFilename,'\t');
+    TfidfDataset     X(HyperParams::tfidf_dataset,',');
+    SentimentLexicon A(HyperParams::lexicon_file,'\t');
+    CryptoLexicon    K(HyperParams::cryptos_file,'\t');
 
-
+    UserVectorDataset users(T, A, K);
+    users.filterOutZeros();
+    users.subtract_average();
 
     std::vector<std::vector<std::string>> suggestions;
 
+    Evaluation evaluation;
 
-    suggestions = userBasedSuggestions(5,uvd, Params::P, K);
- //   suggestions = userBasedSuggestions(5, *U2, *U_normalized, Params::P, K);
-//    printSuggestions(suggestions, *U, "P-range Neighbor Search of U");
+//    std::cout<<"\n\n\n-------------------------- 1 ----------------------------\n\n"<<std::endl;
+//    suggestions = recommend(5, users, HyperParams::P, K, nearest_neighbor, &evaluation);
+//    std::cout<<"\n\n\n-------------------------- 2 ----------------------------\n\n"<<std::endl;
+//    suggestions = recommend(5, users, Params::P, K, clustering, &evaluation);
 
-/*
-    suggestions = userBasedSuggestions(2, U, "kmeans", Params::K);
-    printSuggestions(suggestions, "K-means clustering search of U");
-*/
+
+
+//    auto clusters = vectorizedDatasetClustering(X, 200);
+//    VirtualUserVectorDataset virtualUsers(clusters, T, A, K);
+//    virtualUsers.filterOutZeros();
+//    virtualUsers.subtract_average();
+
+//    std::cout<<"\n\n\n-------------------------- 3 ----------------------------\n\n"<<std::endl;
+//    suggestions = recommend(2, users, virtualUsers, Params::P, K, nearest_neighbor, &evaluation);
+//    std::cout<<"\n\n\n-------------------------- 4  ----------------------------\n\n"<<std::endl;
+//    suggestions = recommend(2, users, virtualUsers, Params::P, K, clustering, &evaluation);
+
+
+    std::cout<<evaluation.getMAE()<<std::endl;
 
     return 0;
 }
@@ -85,3 +91,54 @@ void printUsers(Dataset &U, CryptoLexicon &K){
         std::cout << std::endl;
     }
 }
+
+
+
+void parseCommandLineArguments(int argc, char* argv[]){
+
+    int validate=0;
+    int c;
+    opterr = 0;
+    int option_index = 0;
+    static struct option long_options[] = {
+            {"dataset",     required_argument, 0,           'd'},
+            {"output",      required_argument, 0,           'o'},
+            {"validate",    no_argument,       &validate,    1 },
+            {0, 0, 0, 0}
+    };
+    while ((c = getopt_long_only(argc, argv, "o:d:", long_options, &option_index)) != -1)
+        switch (c) {
+            case 'd':
+                InputArguments::inputFilename = std::string(optarg);
+                break;
+            case 'o':
+                InputArguments::outputFilename = std::string(optarg);
+                break;
+            case '?':
+                if (optopt == 'd' || optopt == 'o') {
+                    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+                }
+                else if (isprint (optopt)) {
+                    fprintf(stderr, "Unknown option `-%c'.\n", optopt);
+                }else {
+                    fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
+                }
+                break;
+            default:
+                break;
+        }
+
+    if (InputArguments::inputFilename.empty()){
+        fprintf(stderr, "Error: Required -d argument.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (InputArguments::outputFilename.empty()){
+        fprintf(stderr, "Error: Required -o argument.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (validate) InputArguments::validate = true;
+}
+
+

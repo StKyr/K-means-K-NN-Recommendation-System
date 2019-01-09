@@ -4,24 +4,23 @@
 
 #include <string>
 
-struct HyperParams{
+namespace HyperParams{
 
-    size_t K;
+    extern size_t k_LSH;
+    extern size_t L_LSH;
 
-    size_t k_LSH;
-    size_t L_LSH;
-    double tau_LSH;
-    size_t w_LSH;
-    double tableSize_LSH;
+    extern int P;
 
-    size_t k_CUBE;
-    size_t M_CUBE;
-    size_t probes_CUBE;
+    extern int K_tweets;
+    extern int K_Cj;
+    extern std::string cryptos_file;
+    extern std::string lexicon_file;
+    extern std::string tfidf_dataset;
 
-
+    extern int sample;
 };
 
-struct HyperParams parse_config_params(std::string config_filename);
+void parse_config_params(std::string config_filename);
 
 
 #endif //ERGASIA2_PARAMETERS_HPP

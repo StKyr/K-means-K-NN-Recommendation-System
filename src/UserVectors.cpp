@@ -1,4 +1,4 @@
-#include "UserVectors.hpp"
+#include "../include/UserVectors.hpp"
 
 
 UserVectorDataset::UserVectorDataset(TokenizedDataset &T, SentimentLexicon &A, CryptoLexicon &K) {
@@ -11,16 +11,16 @@ UserVectorDataset::UserVectorDataset(TokenizedDataset &T, SentimentLexicon &A, C
         auto tweets = T.getUserTweets(userId);
         auto V = createSentimentVector(userId, cnt++, tweets, A, K);
 
-        if (V.second == NDVector::zero_vector(V.second.dim())){
-            __num_zeros++;
-            V = createSentimentVector(userId, cnt, tweets, A, K);
-        }
+//        if (V.second == NDVector::zero_vector(V.second.dim())){
+//            __num_zeros++;
+//            V = createSentimentVector(userId, cnt, tweets, A, K);
+//        }
 
         U[V.first] = V.second;
 
     }
 
-    std::cerr<<"Found "<<__num_zeros<<" zero vectors" << std::endl;
+//    std::cerr<<"Found "<<__num_zeros<<" zero vectors" << std::endl;
 }
 
 
@@ -49,6 +49,8 @@ std::pair<std::string, NDVector> UserVectorDataset::createSentimentVector(std::s
 
         sentiment = computeSentiment(t, A);
         std::vector<double> cryptoVector = K.createCryptoVector(t);
+
+
         NDVector vector(cryptoVector, cnt);
         vector *= sentiment;
         sentimentVector += vector;
@@ -64,6 +66,7 @@ std::pair<std::string, NDVector> UserVectorDataset::createSentimentVector(std::s
 
 
 void UserVectorDataset::filterOutZeros() {
+int __cnt=0;
     static NDVector zero = NDVector::zero_vector(this->U.begin()->second.dim());
     std::unordered_map<UserId, NDVector>::iterator it;
     for (it=this->U.begin(); it != this->U.end(); ){
@@ -71,10 +74,12 @@ void UserVectorDataset::filterOutZeros() {
             this->cryptoMentions.erase(it->first);
             this->averages.erase(it->first);
             it = this->U.erase(it);
+__cnt++;
         }else{
             it++;
         }
     }
+std::cerr<<"Found "<<__cnt<<" empty vectors"<<std::endl;
 }
 
 void UserVectorDataset::subtract_average() {
@@ -94,7 +99,8 @@ void UserVectorDataset::subtract_average() {
 
 
         NDVector v(coords, cnt++);
-        this->U_fixed[item.first] = v;
+        this->U[item.first] = v;
+        this->averages[item.first] = avg;
     }
 }
 
@@ -109,4 +115,31 @@ double UserVectorDataset::computeAverage(std::string userId, NDVector& vector){
     }
     if (num_non_zero) avg /= num_non_zero;
     return avg;
+}
+
+
+
+
+VirtualUserVectorDataset::VirtualUserVectorDataset(std::vector<Cluster>& clusters, TokenizedDataset& T, SentimentLexicon& A, CryptoLexicon& K)
+    :UserVectorDataset(){
+
+    const std::string prefix = "cluster";
+
+    int cnt=0;
+    for (auto& c: clusters){
+
+        auto pointsIds = c.get_points();
+        std::vector<TokensList> clusterTweets;
+        clusterTweets.reserve(pointsIds.size());
+
+        for (auto& p: pointsIds){
+            clusterTweets.emplace_back( T.getTweet(p) );
+        }
+
+        std::stringstream ss("");
+        ss << "cluster" << cnt;
+
+        auto V = createSentimentVector(ss.str(), cnt++, clusterTweets, A, K);
+        U[V.first] = V.second;
+    }
 }

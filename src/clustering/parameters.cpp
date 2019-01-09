@@ -6,6 +6,23 @@
 #include <tuple>
 #include "../../include/parameters.hpp"
 
+namespace HyperParams{
+
+    size_t k_LSH = 2;
+    size_t L_LSH = 3;
+
+    int P;
+
+    int K_tweets = 150;
+    int K_Cj=0;
+    std::string cryptos_file ="../input/coins_queries.csv";
+    std::string lexicon_file ="../input/vader_lexicon.csv";
+    std::string tfidf_dataset = "../input/twitter_dataset_small_v2.csv";
+
+    int sample=0;
+};
+
+
 std::vector<std::string> split(const std::string& str, const std::string& delim)
 {
     std::vector<std::string> tokens;
@@ -25,7 +42,7 @@ std::vector<std::string> split(const std::string& str, const std::string& delim)
 
 struct Options{
     typedef bool(*value_check_fun)(std::string) ;
-    typedef void(*assign_fun)(std::string, struct HyperParams&);
+    typedef void(*assign_fun)(std::string);
 
     std::vector<value_check_fun> check_functions;
     std::vector<assign_fun> assign_functions;
@@ -37,11 +54,11 @@ struct Options{
         assign_functions.push_back(assign);
     }
 
-    void parse_option(std::string& name, std::string& value, struct HyperParams& hyperParams){
+    void parse_option(std::string& name, std::string& value){
         for (int i=0; i<option_names.size(); i++){
             if (name == option_names[i]){
                 if (! check_functions[i](value)) throw std::runtime_error("Invalid value "+value+" for option "+name);
-                assign_functions[i](value, hyperParams);
+                assign_functions[i](value);
                 return;
             }
         }
@@ -50,37 +67,33 @@ struct Options{
 };
 
 bool check_value_k(std::string v)                               {return str_convert<int>(v)>0;}
-void assign_k(std::string v, struct HyperParams& params)        {params.K = str_convert<size_t>(v);}
+void assign_k_tweets(std::string v)                             {HyperParams::K_tweets = str_convert<int>(v);}
 
 bool check_k_LSH(std::string v)                                 {return str_convert<int>(v) > 0;}
-void assign_k_LSH(std::string v, struct HyperParams& params)    {params.k_LSH = str_convert<size_t >(v);}
+void assign_k_LSH(std::string v)                                {HyperParams::k_LSH = str_convert<size_t >(v);}
 
 bool check_L_LSH(std::string v)                                 {return str_convert<int>(v)>0;}
-void assign_L_LSH(std::string v, struct HyperParams& params)    {params.L_LSH = str_convert<size_t >(v);}
+void assign_L_LSH(std::string v)                                {HyperParams::L_LSH = str_convert<size_t >(v);}
 
-bool check_t_LSH(std::string v)                                 {return str_convert<double>(v)>0;}
-void assign_t_LSH(std::string v, struct HyperParams& params)    {params.tau_LSH = str_convert<double>(v);}
+bool check_k_cj(std::string v)                                  {return str_convert<int>(v)>0;}
+void assign_k_cj(std::string v)                                 {HyperParams::K_Cj = str_convert<int>(v);}
 
-bool check_w_LSH(std::string v)                                 {return str_convert<int>(v)>0;}
-void assign_w_LSH(std::string v, struct HyperParams& params)    {params.w_LSH = str_convert<size_t >(v);}
+bool check_lexicon(std::string v)                               {return !v.empty();}
+void assign_lexicon(std::string v)                              {HyperParams::lexicon_file = v;}
 
-bool check_k_CUBE(std::string v)                                 {return str_convert<int>(v)>0;}
-void assign_k_CUBE(std::string v, struct HyperParams& params)    {params.k_CUBE = str_convert<size_t >(v);}
+bool check_tfidf(std::string v)                                 {return !v.empty();}
+void assign_tfidf(std::string v)                                {HyperParams::tfidf_dataset = v;}
 
-bool check_M_CUBE(std::string v)                                 {return str_convert<int>(v)>0;}
-void assign_M_CUBE(std::string v, struct HyperParams& params)    {params.M_CUBE = str_convert<size_t >(v);}
+bool check_coins(std::string v)                                 {return !v.empty();}
+void assign_coins(std::string v)                                {HyperParams::cryptos_file = v;}
 
-bool check_probes_CUBE(std::string v)                              {return str_convert<int>(v)>0;}
-void assign_probes_CUBE(std::string v, struct HyperParams& params) {params.probes_CUBE = str_convert<size_t >(v);}
+bool check_sample(std::string v)                                {return str_convert<int>(v) >0;}
+void assign_sample(std::string v)                               {HyperParams::sample = str_convert<int>(v);}
 
-bool check_tablesize_LSH(std::string v)                              {return str_convert<double>(v)>0 && str_convert<double>(v)<1;}
-void assign_tablesize_LSH(std::string v, struct HyperParams& params) {params.tableSize_LSH = str_convert<double>(v);}
+bool check_P(std::string v)                                     {return str_convert<int>(v) >0;}
+void assign_P(std::string v)                                    {HyperParams::P = str_convert<int>(v);}
 
-struct HyperParams parse_config_params(std::string config_filename){
-
-    struct HyperParams hyperParams;
-    hyperParams.k_LSH = 4;
-    hyperParams.L_LSH = 5;
+void parse_config_params(std::string config_filename){
 
     std::ifstream ifconfig;
     ifconfig.open(config_filename);
@@ -92,16 +105,15 @@ struct HyperParams parse_config_params(std::string config_filename){
     std::string value;
 
     Options options;
-    options.insert("number_of_clusters"      , check_value_k      , assign_k);
-    options.insert("number_of_hash_functions", check_k_LSH        , assign_k_LSH);
-    options.insert("number_of_hash_tables"   , check_L_LSH        , assign_L_LSH);
-    options.insert("t"                       , check_t_LSH        , assign_t_LSH);
-    options.insert("w"                       , check_w_LSH        , assign_w_LSH);
-    options.insert("table_size"              , check_tablesize_LSH, assign_tablesize_LSH);
-    options.insert("hypercube_dimension"     , check_k_CUBE       , assign_k_CUBE);
-    options.insert("number_of_probes"        , check_probes_CUBE  , assign_probes_CUBE);
-    options.insert("max_hypercube_points"    , check_M_CUBE       , assign_M_CUBE);
-
+    options.insert("number_of_tweet_clusters"        , check_value_k      , assign_k_tweets);
+    options.insert("number_of_virtual_users_clusters", check_k_cj         , assign_k_cj);
+    options.insert("number_of_hash_functions"        , check_k_LSH        , assign_k_LSH);
+    options.insert("number_of_hash_tables"           , check_L_LSH        , assign_L_LSH);
+    options.insert("lexicon_filename"                , check_lexicon      , assign_lexicon);
+    options.insert("tfidf_dataset"                   , check_tfidf        , assign_tfidf);
+    options.insert("coins_filename"                  , check_coins        , assign_coins);
+    options.insert("sample"                          , check_sample       , assign_sample);
+    options.insert("P"                               , check_P            , assign_P);
 
     if (ifconfig.is_open()){
         try {
@@ -117,7 +129,7 @@ struct HyperParams parse_config_params(std::string config_filename){
                 }catch(std::exception& e){
                     throw std::runtime_error("option without value");
                 }
-                options.parse_option(option, value, hyperParams);
+                options.parse_option(option, value);
             }
         } catch(std::exception& e) {
             throw std::runtime_error("Invalid format of config file");
@@ -126,5 +138,4 @@ struct HyperParams parse_config_params(std::string config_filename){
         throw std::runtime_error("Cannot open config file");
     }
     ifconfig.close();
-    return hyperParams;
 }

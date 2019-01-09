@@ -1,0 +1,27 @@
+# This is the configuration file
+#
+# Accepted options:
+#
+#  number_of_tweet_clusters
+#  number_of_virtual_users_clusters
+#  number_of_hash_functions
+#  number_of_hash_tables
+#  lexicon_filename
+#  tfidf_dataset
+#  coins_filename
+#  sample                           : int > 0 : compute recommendation for only <sample> points
+#  P                                : int > 0 : This will override previous P from input file
+
+number_of_tweet_clusters: 150
+number_of_hash_functions: 5
+number_of_hash_tables: 3
+
+P: 30
+
+#number_of_virtual_users_clusters: 10
+
+lexicon_filename: ./input/vader_lexicon.csv
+coins_filename: ./input/coins_queries.csv
+tfidf_dataset: ./input/twitter_dataset_small_v2.csv
+
+
